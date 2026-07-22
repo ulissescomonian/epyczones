@@ -1,0 +1,24 @@
+# Swift Package Manager
+.build/
+.swiftpm/
+Package.resolved
+
+# App bundle (built artifact)
+*.app/
+
+# Xcode
+xcuserdata/
+*.xcworkspace/
+DerivedData/
+
+# macOS
+.DS_Store
+*.swp
+*~
+
+# Temporary files
+/tmp/
+tmp/
+dist/
+*.dmg
+*.dmg.sha256
