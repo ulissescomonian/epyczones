@@ -115,26 +115,11 @@ enum WindowManager {
         applySnap(position.frame(in: visibleFrame), to: window)
     }
 
-    static func snap(to zone: Zone) {
-        guard AccessibilityChecker.isGranted else { return }
-        guard let window = getFocusedWindow() else { return }
-
-        let screen = screenForWindow(window) ?? NSScreen.main ?? NSScreen.screens[0]
-        let gap = AppSettings.shared.zoneGap
-        applySnap(zone.rect.frame(in: screen.visibleFrame, gap: gap), to: window)
-    }
-
     static func snapToActiveZone(index: Int) {
         guard AccessibilityChecker.isGranted else { return }
         guard let window = getFocusedWindow() else { return }
         let screen = screenForWindow(window) ?? NSScreen.main ?? NSScreen.screens[0]
         snapToActiveZone(index: index, on: screen, window: window)
-    }
-
-    static func snapToActiveZone(index: Int, on screen: NSScreen, animated: Bool = true) {
-        guard AccessibilityChecker.isGranted else { return }
-        guard let window = getFocusedWindow() else { return }
-        snapToActiveZone(index: index, on: screen, window: window, animated: animated)
     }
 
     /// Snap a window that has already been resolved by the caller. This keeps a
@@ -1233,10 +1218,6 @@ enum WindowManager {
         }.joined(separator: ",")
         logAXMessage("no usable focused window apps=\(identities)", key: "no-window-\(identities)")
         return nil
-    }
-
-    static func setPositionPublic(of window: AXUIElement, to point: CGPoint) {
-        _ = setPosition(of: window, to: point)
     }
 
     @discardableResult

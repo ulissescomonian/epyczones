@@ -154,7 +154,7 @@ final class DragDetector {
 
         case .edge:
             if isOverlayVisible {
-                hideOverlay(snap: false)
+                hideOverlay()
             }
 
             // Edge snap (no modifier): edges → halves, corners → quarters.
@@ -171,7 +171,7 @@ final class DragDetector {
 
         case .none:
             if isOverlayVisible {
-                hideOverlay(snap: false)
+                hideOverlay()
             }
             cancelEdgeSnapTimer()
             snapPreview.hide()
@@ -265,7 +265,7 @@ final class DragDetector {
             showOverlay()
             updateHighlight(at: NSEvent.mouseLocation)
         } else if !shiftHeld && isOverlayVisible {
-            hideOverlay(snap: false)
+            hideOverlay()
         }
     }
 
@@ -308,33 +308,10 @@ final class DragDetector {
         overlay.updateHighlight(zoneIndices: indices, on: screen)
     }
 
-    private func hideOverlay(snap: Bool) {
-        let zoneIndices = overlay.highlightedZoneIndices
-        let screen = overlay.highlightedScreen
+    /// Hides the zones without snapping; a zone snap happens only on mouse up.
+    private func hideOverlay() {
         isOverlayVisible = false
         overlay.hide()
-
-        if snap, !zoneIndices.isEmpty, let window = draggedWindow,
-           let screen = screen,
-           let layout = gestureLayout(for: screen) {
-            let validIndices = zoneIndices.filter { $0 < layout.zones.count }
-            guard !validIndices.isEmpty else { return }
-            let zones = validIndices.map { layout.zones[$0] }
-            snapWindow(window, toZones: zones, on: screen)
-            if let first = validIndices.sorted().first {
-                WindowPersistence.record(window: window, zoneIndex: first, screen: screen, layoutID: layout.id)
-            }
-        }
-    }
-
-    // MARK: - Window Snapping
-
-    /// Snap window to combined bounding rect of one or more zones (spanning).
-    private func snapWindow(_ window: AXUIElement, toZones zones: [Zone], on screen: NSScreen) {
-        let gap = AppSettings.shared.zoneGap
-        let combined = RelativeRect.bounding(zones)
-        let targetNS = combined.frame(in: screen.visibleFrame, gap: gap)
-        WindowManager.applySnap(targetNS, to: window, animated: false)
     }
 
     // MARK: - Window Movement Detection

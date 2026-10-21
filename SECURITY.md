@@ -3,7 +3,7 @@
 ## Supported release
 
 Security fixes are applied to the latest source on `main` and the current
-GitHub Preview release. EpycZones 1.0 requires macOS 14 or later.
+GitHub Preview release. EpycZones requires macOS 14 or later.
 
 ## Reporting a vulnerability
 
@@ -27,7 +27,7 @@ Anyway**. Never disable Gatekeeper globally to install EpycZones.
 Download the DMG and `.sha256` file from the same GitHub Release and verify:
 
 ```bash
-shasum -a 256 -c EpycZones-1.0-arm64.dmg.sha256
+shasum -a 256 -c EpycZones-<version>-arm64.dmg.sha256
 ```
 
 ## Permission and data scope

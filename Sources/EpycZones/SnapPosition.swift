@@ -170,16 +170,6 @@ enum SnapPosition: String, CaseIterable, Codable {
         }
     }
 
-    /// Whether this position needs the current window frame (dynamic positions).
-    var isDynamic: Bool {
-        switch self {
-        case .makeSmaller, .makeLarger, .restore, .maximizeHeight, .dockLeft, .dockRight:
-            return true
-        default:
-            return false
-        }
-    }
-
     /// Calculate the target frame within a given screen area (NSScreen coordinates, bottom-left origin).
     func frame(in rect: CGRect) -> CGRect {
         let x = rect.origin.x

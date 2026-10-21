@@ -79,8 +79,13 @@ final class AppSettings {
         }
     }
 
+    /// Preferences written by 1.0.x that nothing reads anymore.
+    private static let retiredKeys = ["hasPromptedAccessibility", "launchAtLogin"]
+
     private init() {
         let defaults = UserDefaults.standard
+        Self.retiredKeys.forEach(defaults.removeObject(forKey:))
+
         // Register defaults
         defaults.register(defaults: [
             "zoneGap": 0.0,
