@@ -40,6 +40,21 @@ final class AppSettings {
         didSet { UserDefaults.standard.set(restoreWindowsOnLaunch, forKey: "restoreWindowsOnLaunch") }
     }
 
+    /// Show the layout's zones while a window is dragged with `zoneDragModifier` held.
+    var zoneDragEnabled: Bool {
+        didSet { UserDefaults.standard.set(zoneDragEnabled, forKey: "zoneDragEnabled") }
+    }
+
+    /// The key that reveals zones during a drag.
+    var zoneDragModifier: ZoneDragModifier {
+        didSet { UserDefaults.standard.set(zoneDragModifier.rawValue, forKey: "zoneDragModifier") }
+    }
+
+    /// Modifiers of the zone shortcuts 1–9. Callers reload hotkeys after changing it.
+    var zoneHotKeyModifiers: ZoneShortcutModifiers {
+        didSet { UserDefaults.standard.set(Int(zoneHotKeyModifiers.rawValue), forKey: "zoneHotKeyModifiers") }
+    }
+
     /// Enable edge snapping (drag near screen edge without modifier → halves/quarters).
     var edgeSnapEnabled: Bool {
         didSet { UserDefaults.standard.set(edgeSnapEnabled, forKey: "edgeSnapEnabled") }
@@ -92,6 +107,9 @@ final class AppSettings {
             "zoneGap": 0.0,
             "animateSnap": true,
             "restoreWindowsOnLaunch": true,
+            "zoneDragEnabled": true,
+            "zoneDragModifier": ZoneDragModifier.shift.rawValue,
+            "zoneHotKeyModifiers": Int(ZoneShortcutModifiers.default.rawValue),
             "edgeSnapEnabled": true,
             "edgeSnapThreshold": 30.0,
             "edgeSnapDelay": 0.2,
@@ -103,6 +121,11 @@ final class AppSettings {
         self.animateSnap = defaults.bool(forKey: "animateSnap")
         self.launchAtLogin = Self.loginItemIsEnabled
         self.restoreWindowsOnLaunch = defaults.bool(forKey: "restoreWindowsOnLaunch")
+        self.zoneDragEnabled = defaults.bool(forKey: "zoneDragEnabled")
+        self.zoneDragModifier = defaults.string(forKey: "zoneDragModifier")
+            .flatMap(ZoneDragModifier.init(rawValue:)) ?? .shift
+        self.zoneHotKeyModifiers = ZoneShortcutModifiers(rawValue: UInt32(defaults.integer(forKey: "zoneHotKeyModifiers")))
+            ?? .default
         self.edgeSnapEnabled = defaults.bool(forKey: "edgeSnapEnabled")
         self.edgeSnapThreshold = defaults.double(forKey: "edgeSnapThreshold")
         self.edgeSnapDelay = defaults.double(forKey: "edgeSnapDelay")

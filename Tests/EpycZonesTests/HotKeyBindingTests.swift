@@ -57,10 +57,36 @@ final class HotKeyBindingTests: XCTestCase {
         }
     }
 
-    func testZoneShortcutsAreControlOptionDigits() {
-        XCTAssertEqual(HotKeyBinding.zoneBindings.count, 9)
-        XCTAssertTrue(HotKeyBinding.zoneBindings.allSatisfy { $0.modifiers == controlOption })
-        XCTAssertEqual(HotKeyBinding.zoneBindings.first?.keyCode, UInt32(kVK_ANSI_1))
-        XCTAssertEqual(HotKeyBinding.zoneBindings.last?.keyCode, UInt32(kVK_ANSI_9))
+    func testZoneShortcutsAreTheDigitsWithTheChosenModifiers() {
+        let zones = HotKeyBinding.zoneBindings(modifiers: controlOption)
+        XCTAssertEqual(zones.count, 9)
+        XCTAssertTrue(zones.allSatisfy { $0.modifiers == controlOption })
+        XCTAssertEqual(zones.first?.keyCode, UInt32(kVK_ANSI_1))
+        XCTAssertEqual(zones.last?.keyCode, UInt32(kVK_ANSI_9))
+    }
+
+    func testZoneModifiersDecideWhichShortcutsAreReserved() {
+        let controlCommand = ZoneShortcutModifiers.controlCommand.rawValue
+        let controlOption3 = binding(kVK_ANSI_3, controlKey | optionKey)
+        let controlCommand3 = binding(kVK_ANSI_3, controlKey | cmdKey)
+        XCTAssertEqual(controlOption3.validate(for: .leftHalf, customBindings: [:], zoneModifiers: controlCommand), .valid)
+        XCTAssertEqual(
+            controlCommand3.validate(for: .leftHalf, customBindings: [:], zoneModifiers: controlCommand),
+            .conflict("Zone 3")
+        )
+    }
+
+    func testEveryZoneModifierChoiceNeedsControlOrCommand() {
+        for choice in ZoneShortcutModifiers.allCases {
+            XCTAssertNotEqual(choice.rawValue & UInt32(controlKey | cmdKey), 0, "\(choice)")
+        }
+        XCTAssertEqual(ZoneShortcutModifiers.controlOption.symbols, "⌃⌥")
+        XCTAssertEqual(ZoneShortcutModifiers.controlOptionCommand.symbols, "⌃⌥⌘")
+    }
+
+    func testFunctionAndPunctuationKeysHaveNames() {
+        XCTAssertEqual(keyCodeName(UInt32(kVK_F5)), "F5")
+        XCTAssertEqual(keyCodeName(UInt32(kVK_ANSI_LeftBracket)), "[")
+        XCTAssertEqual(binding(kVK_ANSI_4, controlKey | optionKey).modifierSymbols, "⌃⌥")
     }
 }

@@ -119,9 +119,10 @@ final class HotKeyManager {
         registerZoneHotKeys()
     }
 
-    /// Register hotkeys for zone indices 1-9 (Ctrl+Option+1 through Ctrl+Option+9).
+    /// Register hotkeys for zone indices 1-9 with the configured modifiers (⌃⌥ by default).
     func registerZoneHotKeys() {
-        for (index, binding) in HotKeyBinding.zoneBindings.enumerated() {
+        let modifiers = AppSettings.shared.zoneHotKeyModifiers.rawValue
+        for (index, binding) in HotKeyBinding.zoneBindings(modifiers: modifiers).enumerated() {
             let zoneIndex = index
             register(keyCode: binding.keyCode, modifiers: binding.modifiers) {
                 WindowManager.snapToActiveZone(index: zoneIndex)

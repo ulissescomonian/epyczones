@@ -140,7 +140,7 @@ final class DragDetector {
 
         let mode = DragSnapPolicy.mode(
             windowIsMoving: windowIsMoving,
-            shiftHeld: NSEvent.modifierFlags.contains(.shift),
+            zoneKeyHeld: isZoneKeyHeld(NSEvent.modifierFlags),
             suppressed: snapSuppressed,
             edgeSnapEnabled: AppSettings.shared.edgeSnapEnabled
         )
@@ -255,19 +255,25 @@ final class DragDetector {
     }
 
     private func onFlagsChanged(flags: NSEvent.ModifierFlags) {
-        let shiftHeld = flags.contains(.shift)
+        let zoneKeyHeld = isZoneKeyHeld(flags)
 
-        // Re-pressing Shift re-enables snapping after an Esc cancel.
-        if shiftHeld && isDragging { snapSuppressed = false }
+        // Re-pressing the zone key re-enables snapping after an Esc cancel.
+        if zoneKeyHeld && isDragging { snapSuppressed = false }
 
-        if shiftHeld && isDragging && !isOverlayVisible && isWindowMoving() {
+        if zoneKeyHeld && isDragging && !isOverlayVisible && isWindowMoving() {
             cancelEdgeSnapTimer()
             snapPreview.hide()
             showOverlay()
             updateHighlight(at: NSEvent.mouseLocation)
-        } else if !shiftHeld && isOverlayVisible {
+        } else if !zoneKeyHeld && isOverlayVisible {
             hideOverlay()
         }
+    }
+
+    /// The configured zone key (Shift by default) is down and zone snapping is on.
+    private func isZoneKeyHeld(_ flags: NSEvent.ModifierFlags) -> Bool {
+        let settings = AppSettings.shared
+        return settings.zoneDragEnabled && flags.contains(settings.zoneDragModifier.flag)
     }
 
     private func onKeyDown(_ event: NSEvent) {

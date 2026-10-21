@@ -8,13 +8,21 @@ struct HotKeyBinding: Codable, Equatable {
 
     /// Human-readable description, e.g. "⌃⌥←".
     var displayString: String {
+        modifierSymbols + keyName
+    }
+
+    /// Modifier glyphs in Apple's order: ⌃⌥⇧⌘.
+    var modifierSymbols: String {
         var parts: [String] = []
         if modifiers & UInt32(controlKey) != 0 { parts.append("⌃") }
         if modifiers & UInt32(optionKey) != 0 { parts.append("⌥") }
         if modifiers & UInt32(shiftKey) != 0 { parts.append("⇧") }
         if modifiers & UInt32(cmdKey) != 0 { parts.append("⌘") }
-        parts.append(keyCodeName(keyCode))
         return parts.joined()
+    }
+
+    var keyName: String {
+        keyCodeName(keyCode)
     }
 
     static let defaultModifiers = UInt32(controlKey | optionKey)
@@ -23,11 +31,13 @@ struct HotKeyBinding: Codable, Equatable {
     static let none = HotKeyBinding(keyCode: UInt32.max, modifiers: 0)
     var isNone: Bool { keyCode == UInt32.max }
 
-    /// Fixed zone shortcuts ⌃⌥1 … ⌃⌥9, in zone order.
-    static let zoneBindings: [HotKeyBinding] = [
-        kVK_ANSI_1, kVK_ANSI_2, kVK_ANSI_3, kVK_ANSI_4, kVK_ANSI_5,
-        kVK_ANSI_6, kVK_ANSI_7, kVK_ANSI_8, kVK_ANSI_9,
-    ].map { HotKeyBinding(keyCode: UInt32($0), modifiers: defaultModifiers) }
+    /// Zone shortcuts for digits 1 … 9 with the given modifiers, in zone order.
+    static func zoneBindings(modifiers: UInt32) -> [HotKeyBinding] {
+        [
+            kVK_ANSI_1, kVK_ANSI_2, kVK_ANSI_3, kVK_ANSI_4, kVK_ANSI_5,
+            kVK_ANSI_6, kVK_ANSI_7, kVK_ANSI_8, kVK_ANSI_9,
+        ].map { HotKeyBinding(keyCode: UInt32($0), modifiers: modifiers) }
+    }
 
     enum Validation: Equatable {
         case valid
@@ -38,12 +48,16 @@ struct HotKeyBinding: Codable, Equatable {
     }
 
     /// Checks whether `self` can become the shortcut for `action`, given the
-    /// other actions' current bindings and the fixed zone shortcuts.
-    func validate(for action: HotKeyAction, customBindings: [String: HotKeyBinding]) -> Validation {
+    /// other actions' current bindings and the zone shortcuts.
+    func validate(
+        for action: HotKeyAction,
+        customBindings: [String: HotKeyBinding],
+        zoneModifiers: UInt32 = ZoneShortcutModifiers.default.rawValue
+    ) -> Validation {
         let requiredModifiers = UInt32(controlKey | optionKey | cmdKey)
         guard modifiers & requiredModifiers != 0 else { return .needsModifier }
 
-        if let zoneIndex = Self.zoneBindings.firstIndex(of: self) {
+        if let zoneIndex = Self.zoneBindings(modifiers: zoneModifiers).firstIndex(of: self) {
             return .conflict("Zone \(zoneIndex + 1)")
         }
         for other in HotKeyAction.allCases where other != action {
@@ -303,6 +317,48 @@ func keyCodeName(_ keyCode: UInt32) -> String {
     case kVK_ANSI_Keypad7:   return "Num7"
     case kVK_ANSI_Keypad8:   return "Num8"
     case kVK_ANSI_Keypad9:   return "Num9"
+    case kVK_ANSI_KeypadDecimal:  return "Num."
+    case kVK_ANSI_KeypadMultiply: return "Num*"
+    case kVK_ANSI_KeypadPlus:     return "Num+"
+    case kVK_ANSI_KeypadMinus:    return "Num-"
+    case kVK_ANSI_KeypadDivide:   return "Num/"
+    case kVK_ANSI_KeypadEquals:   return "Num="
+    case kVK_ANSI_KeypadEnter:    return "⌤"
+    case kVK_ANSI_KeypadClear:    return "⌧"
+    case kVK_ANSI_LeftBracket:    return "["
+    case kVK_ANSI_RightBracket:   return "]"
+    case kVK_ANSI_Semicolon:      return ";"
+    case kVK_ANSI_Quote:          return "'"
+    case kVK_ANSI_Comma:          return ","
+    case kVK_ANSI_Period:         return "."
+    case kVK_ANSI_Slash:          return "/"
+    case kVK_ANSI_Backslash:      return "\\"
+    case kVK_ANSI_Grave:          return "`"
+    case kVK_ForwardDelete:       return "⌦"
+    case kVK_Home:                return "↖"
+    case kVK_End:                 return "↘"
+    case kVK_PageUp:              return "⇞"
+    case kVK_PageDown:            return "⇟"
+    case kVK_F1:  return "F1"
+    case kVK_F2:  return "F2"
+    case kVK_F3:  return "F3"
+    case kVK_F4:  return "F4"
+    case kVK_F5:  return "F5"
+    case kVK_F6:  return "F6"
+    case kVK_F7:  return "F7"
+    case kVK_F8:  return "F8"
+    case kVK_F9:  return "F9"
+    case kVK_F10: return "F10"
+    case kVK_F11: return "F11"
+    case kVK_F12: return "F12"
+    case kVK_F13: return "F13"
+    case kVK_F14: return "F14"
+    case kVK_F15: return "F15"
+    case kVK_F16: return "F16"
+    case kVK_F17: return "F17"
+    case kVK_F18: return "F18"
+    case kVK_F19: return "F19"
+    case kVK_F20: return "F20"
     default:
         if keyCode == UInt32.max { return "—" }
         return "Key\(keyCode)"

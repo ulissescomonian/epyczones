@@ -71,7 +71,12 @@ final class HotKeyRecorder {
         }
 
         let binding = HotKeyBinding(keyCode: UInt32(keyCode), modifiers: modifiers)
-        switch binding.validate(for: action, customBindings: AppSettings.shared.customHotKeys) {
+        let settings = AppSettings.shared
+        switch binding.validate(
+            for: action,
+            customBindings: settings.customHotKeys,
+            zoneModifiers: settings.zoneHotKeyModifiers.rawValue
+        ) {
         case .valid:
             AppSettings.shared.customHotKeys[action.rawValue] = binding
             stop()
