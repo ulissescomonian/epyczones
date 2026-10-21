@@ -47,6 +47,12 @@ final class AppSettings {
         didSet { UserDefaults.standard.set(edgeSnapDelay, forKey: "edgeSnapDelay") }
     }
 
+    /// Edge snap ignores stretches of edge that another display continues
+    /// past, so moving a window between displays never snaps it on the way.
+    var edgeSnapIgnoresSharedEdges: Bool {
+        didSet { UserDefaults.standard.set(edgeSnapIgnoresSharedEdges, forKey: "edgeSnapIgnoresSharedEdges") }
+    }
+
     /// Edge snap: dragging to the top-center maximizes instead of top half.
     var edgeSnapTopMaximize: Bool {
         didSet { UserDefaults.standard.set(edgeSnapTopMaximize, forKey: "edgeSnapTopMaximize") }
@@ -78,6 +84,7 @@ final class AppSettings {
             "edgeSnapThreshold": 30.0,
             "edgeSnapDelay": 0.2,
             "edgeSnapTopMaximize": false,
+            "edgeSnapIgnoresSharedEdges": true,
             "overlayTheme": "auto",
         ])
         self.zoneGap = defaults.double(forKey: "zoneGap")
@@ -88,6 +95,7 @@ final class AppSettings {
         self.edgeSnapThreshold = defaults.double(forKey: "edgeSnapThreshold")
         self.edgeSnapDelay = defaults.double(forKey: "edgeSnapDelay")
         self.edgeSnapTopMaximize = defaults.bool(forKey: "edgeSnapTopMaximize")
+        self.edgeSnapIgnoresSharedEdges = defaults.bool(forKey: "edgeSnapIgnoresSharedEdges")
         self.overlayTheme = defaults.string(forKey: "overlayTheme") ?? "auto"
         if let data = defaults.data(forKey: "customHotKeys"),
            let decoded = try? JSONDecoder().decode([String: HotKeyBinding].self, from: data) {

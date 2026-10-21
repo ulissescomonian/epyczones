@@ -41,6 +41,38 @@ final class EdgeSnapResolverTests: XCTestCase {
         XCTAssertNil(position(31, 400))
     }
 
+    // MARK: - Edges shared with another display
+
+    private func position(_ x: CGFloat, _ y: CGFloat, neighbors: [CGRect]) -> SnapPosition? {
+        EdgeSnapResolver.position(
+            at: CGPoint(x: x, y: y),
+            in: screen,
+            threshold: 30,
+            topEdgeMaximizes: false,
+            neighborFrames: neighbors
+        )
+    }
+
+    /// A portrait display to the right, taller than this screen.
+    private let rightPortrait = CGRect(x: 1000, y: -200, width: 500, height: 1200)
+
+    func testEdgeSharedWithAnotherDisplayDoesNotSnap() {
+        XCTAssertNil(position(995, 400, neighbors: [rightPortrait]))
+        XCTAssertEqual(position(995, 400, neighbors: []), .rightHalf)
+    }
+
+    func testOuterEdgesStillSnapNextToAnotherDisplay() {
+        XCTAssertEqual(position(5, 400, neighbors: [rightPortrait]), .leftHalf)
+        // The top edge is open, so the top-right corner still gives a quarter.
+        XCTAssertEqual(position(995, 795, neighbors: [rightPortrait]), .topRightQuarter)
+    }
+
+    func testOnlyTheStretchANeighborCoversIsShared() {
+        let shortNeighbor = CGRect(x: 1000, y: 300, width: 400, height: 300)
+        XCTAssertNil(position(995, 400, neighbors: [shortNeighbor]))
+        XCTAssertEqual(position(995, 700, neighbors: [shortNeighbor]), .rightHalf)
+    }
+
     func testFrameOffsetIsRespected() {
         let secondary = CGRect(x: -1080, y: -400, width: 1080, height: 2560)
         let snapped = EdgeSnapResolver.position(

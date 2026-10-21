@@ -16,27 +16,39 @@ enum EdgeSnapResolver {
             $0.frame.insetBy(dx: -1, dy: -1).contains(point)
         }) else { return nil }
 
+        let neighbors = AppSettings.shared.edgeSnapIgnoresSharedEdges
+            ? NSScreen.screens.filter { $0 != screen }.map(\.frame)
+            : []
         guard let position = position(
             at: point,
             in: screen.frame,
             threshold: AppSettings.shared.edgeSnapThreshold,
-            topEdgeMaximizes: AppSettings.shared.edgeSnapTopMaximize
+            topEdgeMaximizes: AppSettings.shared.edgeSnapTopMaximize,
+            neighborFrames: neighbors
         ) else { return nil }
         return Target(position: position, screen: screen)
     }
 
     /// Classifies a point against one screen frame (NSScreen coordinates,
     /// bottom-left origin) without consulting global state.
+    ///
+    /// - Parameter neighborFrames: Other displays. Where one of them continues
+    ///   past an edge at the cursor's position, that stretch of edge is a
+    ///   passage to it, not a snap target.
     static func position(
         at point: NSPoint,
         in f: CGRect,
         threshold: Double,
-        topEdgeMaximizes: Bool
+        topEdgeMaximizes: Bool,
+        neighborFrames: [CGRect] = []
     ) -> SnapPosition? {
-        let nearLeft   = point.x <= f.minX + threshold
-        let nearRight  = point.x >= f.maxX - threshold
-        let nearTop    = point.y >= f.maxY - threshold
-        let nearBottom = point.y <= f.minY + threshold
+        func isOpen(beyond probe: CGPoint) -> Bool {
+            !neighborFrames.contains { $0.contains(probe) }
+        }
+        let nearLeft   = point.x <= f.minX + threshold && isOpen(beyond: CGPoint(x: f.minX - 1, y: point.y))
+        let nearRight  = point.x >= f.maxX - threshold && isOpen(beyond: CGPoint(x: f.maxX + 1, y: point.y))
+        let nearTop    = point.y >= f.maxY - threshold && isOpen(beyond: CGPoint(x: point.x, y: f.maxY + 1))
+        let nearBottom = point.y <= f.minY + threshold && isOpen(beyond: CGPoint(x: point.x, y: f.minY - 1))
         guard nearLeft || nearRight || nearTop || nearBottom else { return nil }
 
         // Corner box: how far along the edge from a corner still counts as that corner.

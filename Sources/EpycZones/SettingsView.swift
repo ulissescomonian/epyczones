@@ -83,6 +83,7 @@ struct SettingsView: View {
                             .monospacedDigit()
                     }
                     Toggle("Top edge maximizes (instead of top half)", isOn: $settings.edgeSnapTopMaximize)
+                    Toggle("Ignore edges shared with another display", isOn: $settings.edgeSnapIgnoresSharedEdges)
                 }
             }
         }
