@@ -15,7 +15,7 @@ fail() {
     exit 1
 }
 
-for tool in swift ditto plutil codesign lipo strings security; do
+for tool in swift ditto plutil codesign lipo strings security xcrun; do
     command -v "$tool" >/dev/null 2>&1 \
         || fail "required tool is unavailable: $tool"
 done
@@ -24,8 +24,11 @@ done
 
 INFO_PLIST_SOURCE="$ROOT_DIR/Resources/Info.plist"
 ICON_SOURCE="$ROOT_DIR/.build/AppIcon.icns"
+STRINGS_SOURCE="$ROOT_DIR/Resources/Localizable.xcstrings"
 [[ -f "$INFO_PLIST_SOURCE" && ! -L "$INFO_PLIST_SOURCE" ]] \
     || fail "Info.plist is not a regular file: $INFO_PLIST_SOURCE"
+[[ -f "$STRINGS_SOURCE" && ! -L "$STRINGS_SOURCE" ]] \
+    || fail "string catalog is not a regular file: $STRINGS_SOURCE"
 
 APP_PATH="${APP_PATH:-$DEFAULT_APP_PATH}"
 OVERWRITE="${OVERWRITE:-1}"
@@ -138,6 +141,12 @@ ditto --noqtn "$EXECUTABLE_SOURCE" "$MACOS/$APP_NAME"
 chmod 0755 "$MACOS/$APP_NAME"
 ditto --noqtn "$INFO_PLIST_SOURCE" "$CONTENTS/Info.plist"
 ditto --noqtn "$ICON_SOURCE" "$RESOURCES/AppIcon.icns"
+
+# English is the source language; the catalog compiles into en.lproj and
+# pt-BR.lproj, which macOS picks from the user's preferred languages.
+xcrun xcstringstool compile "$STRINGS_SOURCE" --output-directory "$RESOURCES" >/dev/null
+[[ -f "$RESOURCES/pt-BR.lproj/Localizable.strings" ]] \
+    || fail "Brazilian Portuguese strings were not compiled from $STRINGS_SOURCE"
 
 plutil -lint "$CONTENTS/Info.plist" >/dev/null
 

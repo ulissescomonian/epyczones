@@ -1,4 +1,5 @@
 import AppKit
+import ObjectiveC
 import ScreenCaptureKit
 import SwiftUI
 import XCTest
@@ -135,6 +136,73 @@ final class ScreenRenderTests: XCTestCase {
         }
     }
 
+    /// The main screens again in Brazilian Portuguese, compiled from the
+    /// string catalog, to check the translations and how longer text fits.
+    func testRenderInPortuguese() async throws {
+        let directory = try XCTUnwrap(outputDirectory).appendingPathComponent("pt-BR")
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        let bundle = try RenderLocalization.compiledBundle()
+        RenderLocalization.install(bundle)
+        defer { RenderLocalization.uninstall() }
+
+        let portuguese = Locale(identifier: "pt-BR")
+        func render<V: View>(_ name: String, _ view: V, _ size: CGSize) async throws {
+            try await ScreenRenderer.render(
+                view.environment(\.locale, portuguese),
+                size: size,
+                dark: false,
+                to: directory.appendingPathComponent("\(name).png")
+            )
+        }
+
+        for pane in SettingsPane.allCases {
+            try await render(
+                "settings-\(pane.rawValue)",
+                SettingsView(initialPane: pane)
+                    .environment(Samples.layoutStore())
+                    .environment(Samples.ruleStore())
+                    .environment(Samples.workspaceStore()),
+                CGSize(width: 860, height: pane == .shortcuts ? 1500 : 760)
+            )
+        }
+
+        let displays = DisplayInfo.connected()
+        let main = try XCTUnwrap(displays.first(where: \.isPrimary))
+        try await render(
+            "layouts-browse-main",
+            LayoutsView(displays: displays, selectedDisplayID: main.id).environment(Samples.layoutStore()),
+            CGSize(width: 1080, height: 760)
+        )
+        let template = LayoutEditSession(
+            editing: Layout.template(.mainAndStack),
+            copyName: "Principal e Pilha cópia",
+            display: main,
+            applyOnSave: .display(main.id)
+        )
+        template.perform { $0[0].rect.width = 0.5 }
+        template.addZone()
+        try await render(
+            "layouts-editor-issues",
+            LayoutsView(displays: displays, selectedDisplayID: main.id, session: template).environment(Samples.layoutStore()),
+            CGSize(width: 1080, height: 760)
+        )
+        for (index, name) in ["accessibility", "layouts"].enumerated() {
+            try await render(
+                "welcome-\(name)",
+                WelcomeView(steps: [.accessibility, .layouts], startingAt: index) {}.environment(Samples.layoutStore()),
+                CGSize(width: 620, height: 600)
+            )
+        }
+        var draft = AppRuleDraft()
+        draft.bundleID = "com.apple.Safari"
+        draft.appName = "Safari"
+        try await render(
+            "app-rule-editor",
+            AppRuleEditor(draft: draft).environment(Samples.layoutStore()).environment(Samples.ruleStore()),
+            CGSize(width: 580, height: 620)
+        )
+    }
+
     func testRenderAppRuleEditor() async throws {
         let directory = try XCTUnwrap(outputDirectory)
         var draft = AppRuleDraft()
@@ -246,6 +314,69 @@ private final class RenderWindow: NSWindow {
 
     override func constrainFrameRect(_ frameRect: NSRect, to screen: NSScreen?) -> NSRect {
         frameRect
+    }
+}
+
+// MARK: - Localization
+
+/// Serves a bundle compiled from the string catalog as `Bundle.main`, which
+/// SwiftUI and `String(localized:)` read, while a render runs.
+@MainActor
+enum RenderLocalization {
+    nonisolated(unsafe) static var bundle: Bundle?
+    private static var installed = false
+
+    static func compiledBundle() throws -> Bundle {
+        let root = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent()
+        let bundleURL = FileManager.default.temporaryDirectory
+            .appendingPathComponent("EpycZonesRender-\(ProcessInfo.processInfo.processIdentifier).bundle")
+        let resources = bundleURL.appendingPathComponent("Contents/Resources")
+        try? FileManager.default.removeItem(at: bundleURL)
+        try FileManager.default.createDirectory(at: resources, withIntermediateDirectories: true)
+        try FileManager.default.copyItem(
+            at: root.appendingPathComponent("Resources/Info.plist"),
+            to: bundleURL.appendingPathComponent("Contents/Info.plist")
+        )
+
+        let compile = Process()
+        compile.executableURL = URL(fileURLWithPath: "/usr/bin/xcrun")
+        compile.arguments = [
+            "xcstringstool", "compile",
+            root.appendingPathComponent("Resources/Localizable.xcstrings").path,
+            "--output-directory", resources.path,
+        ]
+        try compile.run()
+        compile.waitUntilExit()
+        guard compile.terminationStatus == 0, let bundle = Bundle(url: bundleURL) else {
+            throw ScreenRenderer.RenderError.encoding
+        }
+        return bundle
+    }
+
+    static func install(_ bundle: Bundle) {
+        self.bundle = bundle
+        if !installed { exchange() }
+        installed = true
+    }
+
+    static func uninstall() {
+        if installed { exchange() }
+        installed = false
+        bundle = nil
+    }
+
+    private static func exchange() {
+        guard let original = class_getClassMethod(Bundle.self, #selector(getter: Bundle.main)),
+              let replacement = class_getClassMethod(Bundle.self, #selector(getter: Bundle.renderMain)) else { return }
+        method_exchangeImplementations(original, replacement)
+    }
+}
+
+private extension Bundle {
+    /// After the exchange, `Bundle.main` runs this, and this name runs the original.
+    @objc class var renderMain: Bundle {
+        RenderLocalization.bundle ?? renderMain
     }
 }
 

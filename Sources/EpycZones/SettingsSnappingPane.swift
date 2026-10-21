@@ -66,7 +66,11 @@ struct SnappingSettingsPane: View {
                         value: $settings.edgeSnapDelay,
                         range: 0.1...1.0,
                         step: 0.1,
-                        label: { String(format: "%.1f s", $0) }
+                        label: {
+                            Measurement(value: $0, unit: UnitDuration.seconds).formatted(
+                                .measurement(width: .abbreviated, numberFormatStyle: .number.precision(.fractionLength(1)))
+                            )
+                        }
                     )
                     Toggle("Top edge maximizes the window", isOn: $settings.edgeSnapTopMaximize)
                     Toggle(isOn: $settings.edgeSnapIgnoresSharedEdges) {

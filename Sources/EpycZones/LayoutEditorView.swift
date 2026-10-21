@@ -35,7 +35,7 @@ struct LayoutEditorView: View {
             Divider()
 
             LayoutInspector(session: session, focus: $textField)
-                .frame(width: 300)
+                .frame(width: 316)
         }
         .navigationTitle(title)
         .navigationSubtitle(session.display.name)
@@ -151,7 +151,7 @@ private struct EditorTools: View {
 
             ToolSeparator()
 
-            ToolButton(title: "Add Zone", symbol: "plus.rectangle.on.rectangle") {
+            ToolButton(title: "New Zone", symbol: "plus.rectangle.on.rectangle") {
                 session.addZone()
             }
             .help("Add a free zone that you can place anywhere, even over others")
@@ -293,7 +293,7 @@ private struct EditorStatusBar: View {
                 }
             } else {
                 Label {
-                    Text("^[\(count) issue](inflect: true) to check")
+                    Text("\(count) issues to check")
                 } icon: {
                     Image(systemName: "exclamationmark.triangle.fill").foregroundStyle(.orange)
                 }
@@ -381,7 +381,7 @@ private struct LayoutInspector: View {
                 .focused(focus, equals: .zoneName)
 
                 LabeledContent("Position") {
-                    HStack(spacing: 10) {
+                    HStack(spacing: 8) {
                         PercentField(label: "X", value: zone.rect.x, field: .geometry(0), focus: focus) { value in
                             update(zone) { $0.x = value }
                         }
@@ -391,7 +391,7 @@ private struct LayoutInspector: View {
                     }
                 }
                 LabeledContent("Size") {
-                    HStack(spacing: 10) {
+                    HStack(spacing: 8) {
                         PercentField(label: "W", value: zone.rect.width, field: .geometry(2), focus: focus) { value in
                             update(zone) { $0.width = value }
                         }
@@ -520,7 +520,7 @@ private struct PercentField: View {
             .labelsHidden()
             .textFieldStyle(.roundedBorder)
             .multilineTextAlignment(.trailing)
-            .frame(width: 52)
+            .frame(width: 50)
             .focused(focus, equals: field)
             Text(verbatim: "%")
                 .foregroundStyle(.secondary)

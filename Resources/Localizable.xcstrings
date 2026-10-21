@@ -1,0 +1,3424 @@
+{
+  "sourceLanguage": "en",
+  "strings": {
+    "%@ Copy": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ cópia"
+          }
+        }
+      }
+    },
+    "%@ is already used by %@.": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ já é usado por %2$@."
+          }
+        }
+      }
+    },
+    "%@ needs ⌃, ⌥ or ⌘.": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ precisa de ⌃, ⌥ ou ⌘."
+          }
+        }
+      }
+    },
+    "%@ of the display is in no zone. Windows can’t snap there.": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ do monitor não está em nenhuma zona. As janelas não se encaixam ali."
+          }
+        }
+      }
+    },
+    "%@ · Portrait": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ · Retrato"
+          }
+        }
+      }
+    },
+    "%@ · default": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ · padrão"
+          }
+        }
+      }
+    },
+    "%@ · this Desktop": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ · esta Mesa"
+          }
+        }
+      }
+    },
+    "%lld Desktops with this layout will use their display’s layout.": {
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld Desktop with this layout will use its display’s layout."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld Desktops with this layout will use their display’s layout."
+                }
+              }
+            }
+          }
+        },
+        "pt-BR": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld Mesa com este layout passará a usar o layout do monitor."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld Mesas com este layout passarão a usar o layout do monitor."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "%lld issues to check": {
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld issue to check"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld issues to check"
+                }
+              }
+            }
+          }
+        },
+        "pt-BR": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld ponto para verificar"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld pontos para verificar"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "%lld of %lld windows": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$lld of %#@total@"
+          },
+          "substitutions": {
+            "total": {
+              "argNum": 2,
+              "formatSpecifier": "lld",
+              "variations": {
+                "plural": {
+                  "one": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg window"
+                    }
+                  },
+                  "other": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg windows"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$lld de %#@total@"
+          },
+          "substitutions": {
+            "total": {
+              "argNum": 2,
+              "formatSpecifier": "lld",
+              "variations": {
+                "plural": {
+                  "one": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg janela"
+                    }
+                  },
+                  "other": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg janelas"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "%lld pt": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld pt"
+          }
+        }
+      }
+    },
+    "%lld windows from %lld apps": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%#@windows@ from %#@apps@"
+          },
+          "substitutions": {
+            "apps": {
+              "argNum": 2,
+              "formatSpecifier": "lld",
+              "variations": {
+                "plural": {
+                  "one": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg app"
+                    }
+                  },
+                  "other": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg apps"
+                    }
+                  }
+                }
+              }
+            },
+            "windows": {
+              "argNum": 1,
+              "formatSpecifier": "lld",
+              "variations": {
+                "plural": {
+                  "one": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg window"
+                    }
+                  },
+                  "other": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg windows"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%#@windows@ de %#@apps@"
+          },
+          "substitutions": {
+            "apps": {
+              "argNum": 2,
+              "formatSpecifier": "lld",
+              "variations": {
+                "plural": {
+                  "one": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg app"
+                    }
+                  },
+                  "other": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg apps"
+                    }
+                  }
+                }
+              }
+            },
+            "windows": {
+              "argNum": 1,
+              "formatSpecifier": "lld",
+              "variations": {
+                "plural": {
+                  "one": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg janela"
+                    }
+                  },
+                  "other": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg janelas"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "2 Columns": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "2 Colunas"
+          }
+        }
+      }
+    },
+    "2 Rows": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "2 Linhas"
+          }
+        }
+      }
+    },
+    "3 Columns": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "3 Colunas"
+          }
+        }
+      }
+    },
+    "3 Rows": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "3 Linhas"
+          }
+        }
+      }
+    },
+    "A Desktop can have a layout of its own, used instead of the display’s while you are on it.": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uma Mesa pode ter um layout próprio, usado no lugar do layout do monitor enquanto você estiver nela."
+          }
+        }
+      }
+    },
+    "A Position": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uma Posição"
+          }
+        }
+      }
+    },
+    "A Zone": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uma Zona"
+          }
+        }
+      }
+    },
+    "A copy of the %@ template. Saving adds it to your layouts.": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uma cópia do modelo %@. Ao salvar, ela entra nos seus layouts."
+          }
+        }
+      }
+    },
+    "About": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sobre"
+          }
+        }
+      }
+    },
+    "About EpycZones": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sobre o EpycZones"
+          }
+        }
+      }
+    },
+    "Above": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Acima"
+          }
+        }
+      }
+    },
+    "Accessibility": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Acessibilidade"
+          }
+        }
+      }
+    },
+    "Add Rule": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Adicionar Regra"
+          }
+        }
+      }
+    },
+    "Add Rule…": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Adicionar Regra…"
+          }
+        }
+      }
+    },
+    "Add a free zone that you can place anywhere, even over others": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Adicionar uma zona livre, que pode ficar em qualquer lugar, até sobre outras"
+          }
+        }
+      }
+    },
+    "Add a rule to open every new window of an app in the same place.": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Adicione uma regra para abrir toda janela nova de um app no mesmo lugar."
+          }
+        }
+      }
+    },
+    "Allow Accessibility…": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Permitir Acessibilidade…"
+          }
+        }
+      }
+    },
+    "Allow EpycZones Again": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Permita o EpycZones de Novo"
+          }
+        }
+      }
+    },
+    "Allowed": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Permitido"
+          }
+        }
+      }
+    },
+    "Allowed. EpycZones can move windows.": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Permitido. O EpycZones pode mover janelas."
+          }
+        }
+      }
+    },
+    "Almost Maximize": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quase Maximizar"
+          }
+        }
+      }
+    },
+    "Also used on %@. Editing it changes it there too.": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Também é usado em %@. Ao editá-lo, ele muda lá também."
+          }
+        }
+      }
+    },
+    "Animate snapping": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Animar o encaixe"
+          }
+        }
+      }
+    },
+    "App": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "App"
+          }
+        }
+      }
+    },
+    "App Rules": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Regras de Apps"
+          }
+        }
+      }
+    },
+    "Appearance": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aparência"
+          }
+        }
+      }
+    },
+    "Back": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Voltar"
+          }
+        }
+      }
+    },
+    "Below": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abaixo"
+          }
+        }
+      }
+    },
+    "Bottom Center Sixth": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sexto Inferior Central"
+          }
+        }
+      }
+    },
+    "Bottom Half": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Metade Inferior"
+          }
+        }
+      }
+    },
+    "Bottom Left": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Inferior Esquerdo"
+          }
+        }
+      }
+    },
+    "Bottom Left Sixth": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sexto Inferior Esquerdo"
+          }
+        }
+      }
+    },
+    "Bottom Right": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Inferior Direito"
+          }
+        }
+      }
+    },
+    "Bottom Right Sixth": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sexto Inferior Direito"
+          }
+        }
+      }
+    },
+    "Cancel": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cancelar"
+          }
+        }
+      }
+    },
+    "Center": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Centralizar"
+          }
+        }
+      }
+    },
+    "Center Half": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Metade Central"
+          }
+        }
+      }
+    },
+    "Center Third": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Terço Central"
+          }
+        }
+      }
+    },
+    "Center Three Fourths": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Três Quartos Centrais"
+          }
+        }
+      }
+    },
+    "Center Two Thirds": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dois Terços Centrais"
+          }
+        }
+      }
+    },
+    "Checks": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verificações"
+          }
+        }
+      }
+    },
+    "Choose": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Escolher"
+          }
+        }
+      }
+    },
+    "Choose Another App…": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Escolher Outro App…"
+          }
+        }
+      }
+    },
+    "Choose a Layout for Each Display": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Escolha um Layout para Cada Monitor"
+          }
+        }
+      }
+    },
+    "Choose an App": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Escolha um App"
+          }
+        }
+      }
+    },
+    "Choose where new windows of an app open, so you never place them by hand.": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Escolha onde as janelas novas de um app abrem, para nunca precisar posicioná-las à mão."
+          }
+        }
+      }
+    },
+    "Choosing a layout below changes only this Desktop.": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Escolher um layout abaixo muda só esta Mesa."
+          }
+        }
+      }
+    },
+    "Choosing a layout below gives this display its own.": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Escolher um layout abaixo dá a este monitor um layout próprio."
+          }
+        }
+      }
+    },
+    "Chosen for Desktop %lld": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Escolhido para a Mesa %lld"
+          }
+        }
+      }
+    },
+    "Chosen for this Desktop": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Escolhido para esta Mesa"
+          }
+        }
+      }
+    },
+    "Chosen for this display": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Escolhido para este monitor"
+          }
+        }
+      }
+    },
+    "Click, then press the new shortcut. Esc cancels, Delete removes it.": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clique e pressione o novo atalho. Esc cancela, Delete remove."
+          }
+        }
+      }
+    },
+    "Columns": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Colunas"
+          }
+        }
+      }
+    },
+    "Command": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Command"
+          }
+        }
+      }
+    },
+    "Connect a display to arrange its zones.": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Conecte um monitor para organizar as zonas dele."
+          }
+        }
+      }
+    },
+    "Continue": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Continuar"
+          }
+        }
+      }
+    },
+    "Control": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Control"
+          }
+        }
+      }
+    },
+    "Current": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Atual"
+          }
+        }
+      }
+    },
+    "Custom window layouts and fast snapping for macOS.": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Layouts de janelas sob medida e encaixe rápido para o macOS."
+          }
+        }
+      }
+    },
+    "Customize Template": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Personalizar Modelo"
+          }
+        }
+      }
+    },
+    "Customize…": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Personalizar…"
+          }
+        }
+      }
+    },
+    "Customizing a template saves your own copy.": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Personalizar um modelo salva uma cópia sua."
+          }
+        }
+      }
+    },
+    "Cycle Layout": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alternar Layout"
+          }
+        }
+      }
+    },
+    "Dark": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Escuro"
+          }
+        }
+      }
+    },
+    "Default Layout": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Layout Padrão"
+          }
+        }
+      }
+    },
+    "Delete": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apagar"
+          }
+        }
+      }
+    },
+    "Delete Layout": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apagar Layout"
+          }
+        }
+      }
+    },
+    "Delete Rule": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apagar Regra"
+          }
+        }
+      }
+    },
+    "Delete Rule…": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apagar Regra…"
+          }
+        }
+      }
+    },
+    "Delete Workspace": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apagar Espaço de Trabalho"
+          }
+        }
+      }
+    },
+    "Delete the selected zone": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apagar a zona selecionada"
+          }
+        }
+      }
+    },
+    "Delete this rule?": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apagar esta regra?"
+          }
+        }
+      }
+    },
+    "Delete this workspace?": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apagar este espaço de trabalho?"
+          }
+        }
+      }
+    },
+    "Delete “%@”?": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apagar “%@”?"
+          }
+        }
+      }
+    },
+    "Delete…": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apagar…"
+          }
+        }
+      }
+    },
+    "Desktop %lld": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mesa %lld"
+          }
+        }
+      }
+    },
+    "Desktop %lld: %@": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mesa %1$lld: %2$@"
+          }
+        }
+      }
+    },
+    "Desktops": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mesas"
+          }
+        }
+      }
+    },
+    "Discard Changes": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Descartar Alterações"
+          }
+        }
+      }
+    },
+    "Discard your changes?": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Descartar as alterações?"
+          }
+        }
+      }
+    },
+    "Displays": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Monitores"
+          }
+        }
+      }
+    },
+    "Displays and Layouts": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Monitores e Layouts"
+          }
+        }
+      }
+    },
+    "Display’s Layout": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Layout do Monitor"
+          }
+        }
+      }
+    },
+    "Distance from the edge": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Distância da borda"
+          }
+        }
+      }
+    },
+    "Dock Left": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Encostar à Esquerda"
+          }
+        }
+      }
+    },
+    "Dock Right": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Encostar à Direita"
+          }
+        }
+      }
+    },
+    "Done": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Concluir"
+          }
+        }
+      }
+    },
+    "Drag a window to an edge for half the screen, or into a corner for a quarter.": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Arraste uma janela até uma borda para ocupar metade da tela, ou até um canto para ocupar um quarto."
+          }
+        }
+      }
+    },
+    "Drag the line between zones to resize both. Hold ⌥ to move one segment.": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Arraste a linha entre zonas para redimensionar as duas. Segure ⌥ para mover só um trecho."
+          }
+        }
+      }
+    },
+    "Duplicate": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Duplicar"
+          }
+        }
+      }
+    },
+    "Edit App Rule": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Editar Regra de App"
+          }
+        }
+      }
+    },
+    "Edit Layout": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Editar Layout"
+          }
+        }
+      }
+    },
+    "Edit Layout…": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Editar Layout…"
+          }
+        }
+      }
+    },
+    "Edit Rule…": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Editar Regra…"
+          }
+        }
+      }
+    },
+    "Edit in Layouts…": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Editar em Layouts…"
+          }
+        }
+      }
+    },
+    "Edit…": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Editar…"
+          }
+        }
+      }
+    },
+    "EpycZones": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "EpycZones"
+          }
+        }
+      }
+    },
+    "EpycZones can move and resize the windows of other apps.": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O EpycZones pode mover e redimensionar as janelas de outros apps."
+          }
+        }
+      }
+    },
+    "EpycZones has no network access, account or analytics. Layouts and settings stay on this Mac.": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O EpycZones não acessa a rede, não tem conta nem coleta dados de uso. Layouts e ajustes ficam neste Mac."
+          }
+        }
+      }
+    },
+    "EpycZones only moves and resizes windows. It doesn’t read what is in them and never connects to the internet.": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O EpycZones só move e redimensiona janelas. Ele não lê o conteúdo delas e nunca se conecta à internet."
+          }
+        }
+      }
+    },
+    "Every part of the display is in exactly one zone.": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cada parte do monitor está em exatamente uma zona."
+          }
+        }
+      }
+    },
+    "Every shortcut you changed goes back to its original keys.": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Todo atalho que você mudou volta às teclas originais."
+          }
+        }
+      }
+    },
+    "First Fourth": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Primeiro Quarto"
+          }
+        }
+      }
+    },
+    "First Third": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Primeiro Terço"
+          }
+        }
+      }
+    },
+    "First Three Fourths": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Primeiros Três Quartos"
+          }
+        }
+      }
+    },
+    "First Two Thirds": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Primeiros Dois Terços"
+          }
+        }
+      }
+    },
+    "Focus Center": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Foco no Centro"
+          }
+        }
+      }
+    },
+    "Forget": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Esquecer"
+          }
+        }
+      }
+    },
+    "Forget Display": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Esquecer Monitor"
+          }
+        }
+      }
+    },
+    "Forget Display…": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Esquecer Monitor…"
+          }
+        }
+      }
+    },
+    "Forget this display?": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Esquecer este monitor?"
+          }
+        }
+      }
+    },
+    "Fourths": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quartos"
+          }
+        }
+      }
+    },
+    "General": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geral"
+          }
+        }
+      }
+    },
+    "Grid": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Grade"
+          }
+        }
+      }
+    },
+    "Grid 2×2": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Grade 2×2"
+          }
+        }
+      }
+    },
+    "H": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A"
+          }
+        }
+      }
+    },
+    "Halves": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Metades"
+          }
+        }
+      }
+    },
+    "Hold %@ %@ while you drag a window to see the zones of its display. You can change layouts anytime from the menu bar.": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Segure %1$@ %2$@ enquanto arrasta uma janela para ver as zonas do monitor dela. Você pode trocar os layouts quando quiser pela barra de menus."
+          }
+        }
+      }
+    },
+    "Hold the key below while you drag a window to see your layout. Drop on the border between two zones to span both.": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Segure a tecla abaixo enquanto arrasta uma janela para ver o seu layout. Solte na borda entre duas zonas para ocupar as duas."
+          }
+        }
+      }
+    },
+    "How dragging a window reveals your zones and the edges of the screen.": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Como arrastar uma janela mostra as suas zonas e as bordas da tela."
+          }
+        }
+      }
+    },
+    "Ignore edges between displays": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ignorar bordas entre monitores"
+          }
+        }
+      }
+    },
+    "It is the default layout; your first remaining layout takes its place.": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ele é o layout padrão; o primeiro layout que restar fica no lugar dele."
+          }
+        }
+      }
+    },
+    "It is used on %@, which will use the default layout instead.": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ele é usado em %@, que passará a usar o layout padrão."
+          }
+        }
+      }
+    },
+    "Join the selected zone with a neighbor that shares a whole edge": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Juntar a zona selecionada com uma vizinha que divide uma borda inteira com ela"
+          }
+        }
+      }
+    },
+    "Keep Editing": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Continuar Editando"
+          }
+        }
+      }
+    },
+    "Key to hold": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tecla a segurar"
+          }
+        }
+      }
+    },
+    "Last Fourth": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Último Quarto"
+          }
+        }
+      }
+    },
+    "Last Third": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Último Terço"
+          }
+        }
+      }
+    },
+    "Last Three Fourths": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Últimos Três Quartos"
+          }
+        }
+      }
+    },
+    "Last Two Thirds": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Últimos Dois Terços"
+          }
+        }
+      }
+    },
+    "Later": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Depois"
+          }
+        }
+      }
+    },
+    "Layout": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Layout"
+          }
+        }
+      }
+    },
+    "Layout canvas": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Área de edição do layout"
+          }
+        }
+      }
+    },
+    "Layout in Use": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Layout em Uso"
+          }
+        }
+      }
+    },
+    "Layout name": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nome do layout"
+          }
+        }
+      }
+    },
+    "Layouts": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Layouts"
+          }
+        }
+      }
+    },
+    "Layouts you create or customize appear here.": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Os layouts que você cria ou personaliza aparecem aqui."
+          }
+        }
+      }
+    },
+    "Layouts…": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Layouts…"
+          }
+        }
+      }
+    },
+    "Left Half": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Metade Esquerda"
+          }
+        }
+      }
+    },
+    "Light": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Claro"
+          }
+        }
+      }
+    },
+    "MIT License": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Licença MIT"
+          }
+        }
+      }
+    },
+    "Main and Stack": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Principal e Pilha"
+          }
+        }
+      }
+    },
+    "Make Default Layout": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tornar Layout Padrão"
+          }
+        }
+      }
+    },
+    "Make Larger": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aumentar"
+          }
+        }
+      }
+    },
+    "Make Smaller": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diminuir"
+          }
+        }
+      }
+    },
+    "Match System": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Igual ao Sistema"
+          }
+        }
+      }
+    },
+    "Maximize": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Maximizar"
+          }
+        }
+      }
+    },
+    "Maximize Height": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Maximizar Altura"
+          }
+        }
+      }
+    },
+    "Merge": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Juntar"
+          }
+        }
+      }
+    },
+    "Merge With": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Juntar Com"
+          }
+        }
+      }
+    },
+    "Modifier keys": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Teclas modificadoras"
+          }
+        }
+      }
+    },
+    "Move the focused window from the keyboard. Click a shortcut, then press the new keys.": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mova a janela em foco pelo teclado. Clique num atalho e pressione as novas teclas."
+          }
+        }
+      }
+    },
+    "Moved %lld of %lld windows.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moved %1$lld of %#@total@."
+          },
+          "substitutions": {
+            "total": {
+              "argNum": 2,
+              "formatSpecifier": "lld",
+              "variations": {
+                "plural": {
+                  "one": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg window"
+                    }
+                  },
+                  "other": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg windows"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Janelas movidas: %1$lld de %2$lld."
+          }
+        }
+      }
+    },
+    "Moving a window to another display never snaps it on the way.": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Levar uma janela para outro monitor nunca a encaixa no caminho."
+          }
+        }
+      }
+    },
+    "Name": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nome"
+          }
+        }
+      }
+    },
+    "Needed to move and resize the windows of other apps.": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Necessária para mover e redimensionar as janelas de outros apps."
+          }
+        }
+      }
+    },
+    "New App Rule": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nova Regra de App"
+          }
+        }
+      }
+    },
+    "New Layout": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Novo Layout"
+          }
+        }
+      }
+    },
+    "New Zone": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nova Zona"
+          }
+        }
+      }
+    },
+    "New windows of %@ will open where the app places them.": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "As janelas novas de %@ vão abrir onde o próprio app as coloca."
+          }
+        }
+      }
+    },
+    "Next Display": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Próximo Monitor"
+          }
+        }
+      }
+    },
+    "No App Rules Yet": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nenhuma Regra de App"
+          }
+        }
+      }
+    },
+    "No Displays": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nenhum Monitor"
+          }
+        }
+      }
+    },
+    "No Shortcuts Found": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nenhum Atalho Encontrado"
+          }
+        }
+      }
+    },
+    "No Windows to Save": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nenhuma Janela para Salvar"
+          }
+        }
+      }
+    },
+    "No Workspaces Yet": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nenhum Espaço de Trabalho"
+          }
+        }
+      }
+    },
+    "No display uses it.": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nenhum monitor usa este layout."
+          }
+        }
+      }
+    },
+    "No gaps or overlaps": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sem vãos nem sobreposições"
+          }
+        }
+      }
+    },
+    "None": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nenhum"
+          }
+        }
+      }
+    },
+    "Not Connected": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Desconectados"
+          }
+        }
+      }
+    },
+    "Not open: %@.": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Não estão abertos: %@."
+          }
+        }
+      }
+    },
+    "Number": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Número"
+          }
+        }
+      }
+    },
+    "Number the zones from top to bottom, then left to right": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Numerar as zonas de cima para baixo e depois da esquerda para a direita"
+          }
+        }
+      }
+    },
+    "On the left": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "À esquerda"
+          }
+        }
+      }
+    },
+    "On the right": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "À direita"
+          }
+        }
+      }
+    },
+    "Only the first 9 zones have shortcuts; %lld more have none.": {
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Only the first 9 zones have shortcuts; %lld more has none."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Only the first 9 zones have shortcuts; %lld more have none."
+                }
+              }
+            }
+          }
+        },
+        "pt-BR": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Só as 9 primeiras zonas têm atalho; %lld zona a mais fica sem."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Só as 9 primeiras zonas têm atalho; %lld zonas a mais ficam sem."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "Open Privacy Settings…": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abrir Ajustes de Privacidade…"
+          }
+        }
+      }
+    },
+    "Open at login": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abrir ao iniciar a sessão"
+          }
+        }
+      }
+    },
+    "Open new windows in": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abrir janelas novas em"
+          }
+        }
+      }
+    },
+    "Open the windows you want in this workspace, then try again.": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abra as janelas que você quer neste espaço de trabalho e tente de novo."
+          }
+        }
+      }
+    },
+    "Option": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Option"
+          }
+        }
+      }
+    },
+    "Optional": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opcional"
+          }
+        }
+      }
+    },
+    "Order": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ordem"
+          }
+        }
+      }
+    },
+    "Permissions, startup and how EpycZones looks while you arrange windows.": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Permissões, inicialização e a aparência do EpycZones enquanto você organiza janelas."
+          }
+        }
+      }
+    },
+    "Pixels": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pixels"
+          }
+        }
+      }
+    },
+    "Placement": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Posicionamento"
+          }
+        }
+      }
+    },
+    "Position": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Posição"
+          }
+        }
+      }
+    },
+    "Press the new shortcut. Esc cancels, Delete removes it.": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pressione o novo atalho. Esc cancela, Delete remove."
+          }
+        }
+      }
+    },
+    "Preview of the layout on your main display, with the space magnified.": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Prévia do layout do monitor principal, com o espaço ampliado."
+          }
+        }
+      }
+    },
+    "Previous Display": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Monitor Anterior"
+          }
+        }
+      }
+    },
+    "Priority Left": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Prioridade à Esquerda"
+          }
+        }
+      }
+    },
+    "Priority Right": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Prioridade à Direita"
+          }
+        }
+      }
+    },
+    "Privacy": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Privacidade"
+          }
+        }
+      }
+    },
+    "Quarters": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cantos"
+          }
+        }
+      }
+    },
+    "Quit EpycZones": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Encerrar o EpycZones"
+          }
+        }
+      }
+    },
+    "Redo": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Refazer"
+          }
+        }
+      }
+    },
+    "Rename": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Renomear"
+          }
+        }
+      }
+    },
+    "Rename Layout": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Renomear Layout"
+          }
+        }
+      }
+    },
+    "Rename Workspace": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Renomear Espaço de Trabalho"
+          }
+        }
+      }
+    },
+    "Rename…": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Renomear…"
+          }
+        }
+      }
+    },
+    "Restore": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Restaurar"
+          }
+        }
+      }
+    },
+    "Restore Default Shortcuts…": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Restaurar Atalhos Padrão…"
+          }
+        }
+      }
+    },
+    "Restore Defaults": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Restaurar Padrões"
+          }
+        }
+      }
+    },
+    "Restore the default shortcut": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Restaurar o atalho padrão"
+          }
+        }
+      }
+    },
+    "Restore the default shortcuts?": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Restaurar os atalhos padrão?"
+          }
+        }
+      }
+    },
+    "Restore windows to their zones": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Devolver as janelas às zonas"
+          }
+        }
+      }
+    },
+    "Restoring moves windows that are open. It does not open apps.": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Restaurar move as janelas que estão abertas. Não abre apps."
+          }
+        }
+      }
+    },
+    "Right Half": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Metade Direita"
+          }
+        }
+      }
+    },
+    "Rows": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Linhas"
+          }
+        }
+      }
+    },
+    "Rules apply to new document windows, not to dialogs or panels.": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "As regras valem para janelas novas de documentos, não para diálogos nem painéis."
+          }
+        }
+      }
+    },
+    "Save": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Salvar"
+          }
+        }
+      }
+    },
+    "Save Current Windows…": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Salvar Janelas Atuais…"
+          }
+        }
+      }
+    },
+    "Save Workspace": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Salvar Espaço de Trabalho"
+          }
+        }
+      }
+    },
+    "Save the windows you have open now, then put them back in the same places with one click.": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Salve as janelas abertas agora e depois devolva-as aos mesmos lugares com um clique."
+          }
+        }
+      }
+    },
+    "Save where your windows are and put them back with one click.": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Salve onde estão as suas janelas e devolva-as com um clique."
+          }
+        }
+      }
+    },
+    "Screen Edges": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bordas da Tela"
+          }
+        }
+      }
+    },
+    "Search shortcuts": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Buscar atalhos"
+          }
+        }
+      }
+    },
+    "Second Fourth": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Segundo Quarto"
+          }
+        }
+      }
+    },
+    "Select a zone on the canvas to change it. Tab moves between zones.": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Selecione uma zona na área de edição para alterá-la. Tab passa de uma zona para outra."
+          }
+        }
+      }
+    },
+    "Sends the focused window to that zone of the layout on its display.": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Envia a janela em foco para essa zona do layout do monitor dela."
+          }
+        }
+      }
+    },
+    "Settings": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ajustes"
+          }
+        }
+      }
+    },
+    "Settings…": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ajustes…"
+          }
+        }
+      }
+    },
+    "Shift": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shift"
+          }
+        }
+      }
+    },
+    "Shortcut": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Atalho"
+          }
+        }
+      }
+    },
+    "Shortcuts": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Atalhos"
+          }
+        }
+      }
+    },
+    "Show on Display": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mostrar no Monitor"
+          }
+        }
+      }
+    },
+    "Show the layout of": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mostrar o layout de"
+          }
+        }
+      }
+    },
+    "Show the zones on this display for a moment": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mostrar as zonas neste monitor por um instante"
+          }
+        }
+      }
+    },
+    "Show these zones on %@ for a moment, as dragging shows them": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mostrar estas zonas em %@ por um instante, como aparecem ao arrastar"
+          }
+        }
+      }
+    },
+    "Show zones while dragging": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mostrar zonas ao arrastar"
+          }
+        }
+      }
+    },
+    "Signed on this Mac, not by an Apple Developer ID, and not notarized. Install it only from a source you trust.": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Assinado neste Mac, sem Apple Developer ID e sem notarização. Instale apenas a partir de uma fonte em que você confia."
+          }
+        }
+      }
+    },
+    "Sixths": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sextos"
+          }
+        }
+      }
+    },
+    "Size": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tamanho"
+          }
+        }
+      }
+    },
+    "Size and Position": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tamanho e Posição"
+          }
+        }
+      }
+    },
+    "Snap to screen edges": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Encaixar nas bordas da tela"
+          }
+        }
+      }
+    },
+    "Snap zones and dividers to a grid of 24 steps": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alinhar zonas e divisórias a uma grade de 24 passos"
+          }
+        }
+      }
+    },
+    "Snapping": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Encaixe"
+          }
+        }
+      }
+    },
+    "Sort by Position": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ordenar por Posição"
+          }
+        }
+      }
+    },
+    "Source Code on GitHub": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Código-Fonte no GitHub"
+          }
+        }
+      }
+    },
+    "Space between zones": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Espaço entre zonas"
+          }
+        }
+      }
+    },
+    "Split the selected zone into two columns": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dividir a zona selecionada em duas colunas"
+          }
+        }
+      }
+    },
+    "Split the selected zone into two rows": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dividir a zona selecionada em duas linhas"
+          }
+        }
+      }
+    },
+    "Start from one zone over the whole display, then split it": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Começar com uma zona no monitor inteiro e depois dividi-la"
+          }
+        }
+      }
+    },
+    "Startup": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Inicialização"
+          }
+        }
+      }
+    },
+    "Step %lld of %lld": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Passo %1$lld de %2$lld"
+          }
+        }
+      }
+    },
+    "Templates": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Modelos"
+          }
+        }
+      }
+    },
+    "Test on Display": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Testar no Monitor"
+          }
+        }
+      }
+    },
+    "The default layout": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O layout padrão"
+          }
+        }
+      }
+    },
+    "The layout has no zones, so dragging shows nothing on this display.": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O layout não tem zonas, então arrastar não mostra nada neste monitor."
+          }
+        }
+      }
+    },
+    "The layout stays as it was before you started editing.": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O layout fica como estava antes da edição."
+          }
+        }
+      }
+    },
+    "The new layout will not be created.": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O novo layout não será criado."
+          }
+        }
+      }
+    },
+    "The number is the zone’s shortcut. Drag a zone to change it.": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O número é o atalho da zona. Arraste uma zona para mudá-lo."
+          }
+        }
+      }
+    },
+    "Third Fourth": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Terceiro Quarto"
+          }
+        }
+      }
+    },
+    "Thirds": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Terços"
+          }
+        }
+      }
+    },
+    "This Build": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Esta Versão"
+          }
+        }
+      }
+    },
+    "This display has no layout with zones yet.": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Este monitor ainda não tem um layout com zonas."
+          }
+        }
+      }
+    },
+    "This replaces the current rule for %@.": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Isto substitui a regra atual de %@."
+          }
+        }
+      }
+    },
+    "To move and resize the windows of other apps, EpycZones needs your permission in Accessibility.": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Para mover e redimensionar as janelas de outros apps, o EpycZones precisa da sua permissão em Acessibilidade."
+          }
+        }
+      }
+    },
+    "Top Center Sixth": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sexto Superior Central"
+          }
+        }
+      }
+    },
+    "Top Half": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Metade Superior"
+          }
+        }
+      }
+    },
+    "Top Left": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Superior Esquerdo"
+          }
+        }
+      }
+    },
+    "Top Left Sixth": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sexto Superior Esquerdo"
+          }
+        }
+      }
+    },
+    "Top Right": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Superior Direito"
+          }
+        }
+      }
+    },
+    "Top Right Sixth": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sexto Superior Direito"
+          }
+        }
+      }
+    },
+    "Top edge maximizes the window": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A borda superior maximiza a janela"
+          }
+        }
+      }
+    },
+    "Try another name, such as “half” or “display”.": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tente outro nome, como “metade” ou “monitor”."
+          }
+        }
+      }
+    },
+    "Turn on EpycZones in Privacy & Security, then come back.": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ative o EpycZones em Privacidade e Segurança e depois volte aqui."
+          }
+        }
+      }
+    },
+    "Two Thirds": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dois Terços"
+          }
+        }
+      }
+    },
+    "Type a shortcut": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Digite um atalho"
+          }
+        }
+      }
+    },
+    "Undo": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Desfazer"
+          }
+        }
+      }
+    },
+    "Unknown Display": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Monitor Desconhecido"
+          }
+        }
+      }
+    },
+    "Untitled Window": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Janela sem Título"
+          }
+        }
+      }
+    },
+    "Use on %@": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Usar em %@"
+          }
+        }
+      }
+    },
+    "Use the Default Layout": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Usar o Layout Padrão"
+          }
+        }
+      }
+    },
+    "Use the Display’s Layout": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Usar o Layout do Monitor"
+          }
+        }
+      }
+    },
+    "Use the Display’s Layout on This Desktop": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Usar o Layout do Monitor nesta Mesa"
+          }
+        }
+      }
+    },
+    "Used by a display that has no layout of its own, such as one you connect for the first time.": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Usado por um monitor sem layout próprio, como um que você conecta pela primeira vez."
+          }
+        }
+      }
+    },
+    "Used on %@.": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Usado em %@."
+          }
+        }
+      }
+    },
+    "Version %@ (%@)": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Versão %1$@ (%2$@)"
+          }
+        }
+      }
+    },
+    "W": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "L"
+          }
+        }
+      }
+    },
+    "Wait before showing": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Espera antes de mostrar"
+          }
+        }
+      }
+    },
+    "Welcome to EpycZones": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Boas-vindas ao EpycZones"
+          }
+        }
+      }
+    },
+    "When EpycZones opens, windows you snapped to a zone go back to it.": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quando o EpycZones abre, as janelas que você encaixou numa zona voltam para ela."
+          }
+        }
+      }
+    },
+    "Windows": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Janelas"
+          }
+        }
+      }
+    },
+    "Windows can’t snap until EpycZones is allowed.": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "As janelas não se encaixam até você permitir o EpycZones."
+          }
+        }
+      }
+    },
+    "Windows glide into place instead of jumping.": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "As janelas deslizam até o lugar em vez de saltar."
+          }
+        }
+      }
+    },
+    "Windows keep this distance from each other and from the edges of their zone.": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "As janelas mantêm esta distância umas das outras e das bordas da zona."
+          }
+        }
+      }
+    },
+    "Work, Writing, Review…": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trabalho, Escrita, Revisão…"
+          }
+        }
+      }
+    },
+    "Workspace %lld": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Espaço de Trabalho %lld"
+          }
+        }
+      }
+    },
+    "Workspaces": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Espaços de Trabalho"
+          }
+        }
+      }
+    },
+    "X": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "X"
+          }
+        }
+      }
+    },
+    "Y": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Y"
+          }
+        }
+      }
+    },
+    "Your Layouts": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Seus Layouts"
+          }
+        }
+      }
+    },
+    "Zone": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zona"
+          }
+        }
+      }
+    },
+    "Zone %lld": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zona %lld"
+          }
+        }
+      }
+    },
+    "Zone numbers follow the layout of the display where the window opens.": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Os números das zonas seguem o layout do monitor onde a janela abre."
+          }
+        }
+      }
+    },
+    "Zone overlay": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Visual das zonas"
+          }
+        }
+      }
+    },
+    "Zones": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zonas"
+          }
+        }
+      }
+    },
+    "Zones %lld and %lld overlap.": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "As zonas %1$lld e %2$lld se sobrepõem."
+          }
+        }
+      }
+    },
+    "Zones 1 to 9": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zonas 1 a 9"
+          }
+        }
+      }
+    },
+    "macOS also offers its own tiling while you drag with Option held.": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O macOS também organiza janelas por conta própria quando você arrasta segurando Option."
+          }
+        }
+      }
+    },
+    "macOS turned off Accessibility for this copy of EpycZones, as it does after some updates. Turn it on again to keep snapping windows.": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O macOS desativou a Acessibilidade desta cópia do EpycZones, como acontece depois de algumas atualizações. Ative de novo para continuar encaixando janelas."
+          }
+        }
+      }
+    },
+    "“%@” will be removed. Your windows stay where they are.": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "“%@” será removido. As suas janelas ficam onde estão."
+          }
+        }
+      }
+    },
+    "“%@” will use the default layout if you connect it again.": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "“%@” vai usar o layout padrão se você conectá-lo de novo."
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}

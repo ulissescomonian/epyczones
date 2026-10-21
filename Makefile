@@ -1,7 +1,7 @@
 APP_NAME := EpycZones
 APP_BUNDLE := .build/$(APP_NAME).app
 
-.PHONY: build debug test strict screens icon bundle run dmg clean
+.PHONY: strings build debug test strict screens icon bundle run dmg clean
 
 debug:
 	swift build
@@ -35,3 +35,10 @@ dmg:
 clean:
 	swift package clean
 	rm -rf -- .build/$(APP_NAME).app .build/AppIcon.icns dist
+
+# Adds strings that are new in the code to the catalog, and marks removed
+# ones stale. Translate the new ones; LocalizationTests fails until then.
+strings:
+	rm -rf .build/loc .build/loc-strings
+	swift build --build-path .build/loc --product EpycZones -Xswiftc -emit-localized-strings -Xswiftc -emit-localized-strings-path -Xswiftc "$(CURDIR)/.build/loc-strings"
+	xcrun xcstringstool sync Resources/Localizable.xcstrings --stringsdata .build/loc-strings/*.stringsdata

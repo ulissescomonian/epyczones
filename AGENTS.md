@@ -9,6 +9,8 @@ EpycZones is a Swift 5.9 executable package targeting macOS 14. Application code
 - `make debug` runs a fast development build with `swift build`.
 - `make test` runs the unit tests with `swift test`.
 - `make strict` builds with Swift 6 strict concurrency and fails on any warning. App types are `@MainActor`; system callbacks that already run on the main thread enter it with `MainActor.assumeIsolated`, and pure helpers stay `nonisolated` so tests can call them.
+- `make screens` renders every window and pane to PNG in `.build/screens`, in light and dark mode and again in Brazilian Portuguese, from in-memory sample data. It never shows a window on screen, but the terminal needs the Screen Recording permission.
+- `make strings` adds strings that are new in the code to `Resources/Localizable.xcstrings` and marks removed ones stale.
 - `make build` creates the release executable.
 - `make icon` regenerates and validates `.build/AppIcon.icns` from `Resources/AppIcon.png`.
 - `make bundle` builds and assembles the local `.build/EpycZones.app`; it is a development artifact, not a distributable release.
@@ -30,6 +32,8 @@ EpycZones is a Swift 5.9 executable package targeting macOS 14. Application code
 ## Coding Style & Naming Conventions
 
 Use four-space indentation and opening braces on the declaration line. Name types and files in `UpperCamelCase` (`EdgeSnapResolver.swift`); use `lowerCamelCase` for functions, properties, and enum cases. Prefer narrow access control (`private`, `private(set)`), `// MARK: -` sections in larger files, and `///` comments for non-obvious APIs or coordinate-system decisions. No formatter or linter is configured, so match nearby code and keep diffs focused.
+
+The interface is in English and Brazilian Portuguese. Write user-facing text as string literals in SwiftUI views or with `String(localized:)`, never assembled from pieces, and use `Text(verbatim:)` for data such as layout and display names. After adding or changing text, run `make strings` and translate the new entries in the catalog; `LocalizationTests` fails while any string lacks a translation or a translation changes its placeholders. Counts that need singular and plural forms get plural variations in the catalog. Packaging compiles the catalog into `en.lproj` and `pt-BR.lproj`.
 
 ## Testing Guidelines
 

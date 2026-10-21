@@ -6,6 +6,13 @@
     <string>EpycZones</string>
     <key>CFBundleDisplayName</key>
     <string>EpycZones</string>
+    <key>CFBundleDevelopmentRegion</key>
+    <string>en</string>
+    <key>CFBundleLocalizations</key>
+    <array>
+        <string>en</string>
+        <string>pt-BR</string>
+    </array>
     <key>CFBundleIdentifier</key>
     <string>com.ulisses.epyczones</string>
     <key>CFBundleVersion</key>

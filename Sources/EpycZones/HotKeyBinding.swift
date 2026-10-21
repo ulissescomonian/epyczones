@@ -58,7 +58,7 @@ struct HotKeyBinding: Codable, Equatable {
         guard modifiers & requiredModifiers != 0 else { return .needsModifier }
 
         if let zoneIndex = Self.zoneBindings(modifiers: zoneModifiers).firstIndex(of: self) {
-            return .conflict("Zone \(zoneIndex + 1)")
+            return .conflict(String(localized: "Zone \(zoneIndex + 1)"))
         }
         for other in HotKeyAction.allCases where other != action {
             let otherBinding = customBindings[other.rawValue] ?? other.defaultBinding
