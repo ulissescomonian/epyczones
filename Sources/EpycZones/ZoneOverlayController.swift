@@ -76,25 +76,16 @@ final class ZoneOverlayNSView: NSView {
     let layout: Layout
     let screenFrame: NSRect
     let visibleFrame: NSRect
-    var highlightedZoneIndices: Set<Int> = []
-
-    /// Redraw timer for the marching-ants ghost border.
-    private var antsTimer: Timer?
-
-    override func viewDidMoveToWindow() {
-        super.viewDidMoveToWindow()
-        antsTimer?.invalidate()
-        antsTimer = nil
-        guard window != nil else { return }
-        antsTimer = Timer.scheduledTimer(withTimeInterval: 1.0 / 30.0, repeats: true) { [weak self] _ in
-            guard let self = self, !self.highlightedZoneIndices.isEmpty else { return }
-            self.needsDisplay = true
-        }
+    var highlightedZoneIndices: Set<Int> = [] {
+        didSet { updateGhost() }
     }
 
-    deinit {
-        antsTimer?.invalidate()
-    }
+    /// Ghost "window" over the highlighted zones; animates on its own, so the
+    /// view only redraws when the highlight changes.
+    private let ghostLayer = GhostOutlineLayer()
+
+    /// Inset of each drawn zone from its slot, in points.
+    private static let zoneInset: CGFloat = 4
 
     private let zoneColors: [NSColor] = [
         .systemBlue, .systemGreen, .systemOrange, .systemPurple,
@@ -107,10 +98,57 @@ final class ZoneOverlayNSView: NSView {
         self.screenFrame = screenFrame
         self.visibleFrame = visibleFrame
         super.init(frame: NSRect(origin: .zero, size: screenFrame.size))
+        wantsLayer = true
+        ghostLayer.isHidden = true
+        layer?.addSublayer(ghostLayer)
     }
 
     @available(*, unavailable)
     required init?(coder: NSCoder) { fatalError() }
+
+    override func viewDidMoveToWindow() {
+        super.viewDidMoveToWindow()
+        if ghostLayer.superlayer == nil {
+            layer?.addSublayer(ghostLayer)
+        }
+    }
+
+    override func viewDidChangeBackingProperties() {
+        super.viewDidChangeBackingProperties()
+        ghostLayer.contentsScale = window?.backingScaleFactor ?? 1
+    }
+
+    /// The screen's visible frame in this view's coordinates.
+    private var visibleFrameLocal: NSRect {
+        NSRect(
+            x: visibleFrame.origin.x - screenFrame.origin.x,
+            y: visibleFrame.origin.y - screenFrame.origin.y,
+            width: visibleFrame.width,
+            height: visibleFrame.height
+        )
+    }
+
+    /// Places the ghost over the combined highlighted zones, 4 pt inside them.
+    private func updateGhost() {
+        let zones = highlightedZoneIndices.compactMap { index -> Zone? in
+            index < layout.zones.count ? layout.zones[index] : nil
+        }
+        guard !zones.isEmpty else {
+            ghostLayer.isHidden = true
+            return
+        }
+
+        let vfLocal = visibleFrameLocal
+        let combined = RelativeRect.bounding(zones)
+        let inset = Self.zoneInset + 4
+        ghostLayer.outline(NSRect(
+            x: vfLocal.origin.x + combined.x * vfLocal.width + inset,
+            y: vfLocal.origin.y + (1.0 - combined.y - combined.height) * vfLocal.height + inset,
+            width: combined.width * vfLocal.width - inset * 2,
+            height: combined.height * vfLocal.height - inset * 2
+        ))
+        ghostLayer.isHidden = false
+    }
 
     override func draw(_ dirtyRect: NSRect) {
         let isDark = AppSettings.shared.overlayIsDark
@@ -122,14 +160,8 @@ final class ZoneOverlayNSView: NSView {
         bgColor.setFill()
         bounds.fill()
 
-        let vfLocal = NSRect(
-            x: visibleFrame.origin.x - screenFrame.origin.x,
-            y: visibleFrame.origin.y - screenFrame.origin.y,
-            width: visibleFrame.width,
-            height: visibleFrame.height
-        )
-
-        let gap: CGFloat = 4
+        let vfLocal = visibleFrameLocal
+        let gap = Self.zoneInset
         let baseColor = isDark ? NSColor.white : NSColor.black
 
         for (index, zone) in layout.zones.enumerated() {
@@ -174,35 +206,6 @@ final class ZoneOverlayNSView: NSView {
                 x: rect.midX - labelSize.width / 2,
                 y: rect.midY - labelSize.height / 2
             ))
-        }
-
-        // Ghost preview: draw a translucent "window" outline over the combined highlighted zone area
-        if !highlightedZoneIndices.isEmpty {
-            let highlightedZones = highlightedZoneIndices.compactMap { idx -> Zone? in
-                idx < layout.zones.count ? layout.zones[idx] : nil
-            }
-            guard !highlightedZones.isEmpty else { return }
-
-            let combined = RelativeRect.bounding(highlightedZones)
-            let ghostRect = NSRect(
-                x: vfLocal.origin.x + combined.x * vfLocal.width + gap + 4,
-                y: vfLocal.origin.y + (1.0 - combined.y - combined.height) * vfLocal.height + gap + 4,
-                width: combined.width * vfLocal.width - gap * 2 - 8,
-                height: combined.height * vfLocal.height - gap * 2 - 8
-            )
-
-            // Ghost window fill
-            NSColor.systemBlue.withAlphaComponent(0.12).setFill()
-            let ghostPath = NSBezierPath(roundedRect: ghostRect, xRadius: 8, yRadius: 8)
-            ghostPath.fill()
-
-            // Ghost window border (dashed, marching ants — ~1.5 periods/s)
-            NSColor.white.withAlphaComponent(0.6).setStroke()
-            ghostPath.lineWidth = 2
-            let pattern: [CGFloat] = [6, 4]
-            let phase = -CGFloat((CACurrentMediaTime() * 15).truncatingRemainder(dividingBy: 10))
-            ghostPath.setLineDash(pattern, count: 2, phase: phase)
-            ghostPath.stroke()
         }
     }
 }
