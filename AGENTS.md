@@ -37,7 +37,7 @@ The interface is in English and Brazilian Portuguese. Write user-facing text as 
 
 ## Testing Guidelines
 
-Unit tests live in the `Tests/EpycZonesTests/` XCTest target, in files named `*Tests.swift`. They cover pure logic: snap geometry, zone hit-testing, edge resolution, and layout precedence. Keep new logic testable by separating it from `NSScreen`, Accessibility, and persisted state. There is no coverage requirement. Before every PR, run `make debug`, `make test` and `make strict`. For window-management or UI changes, also run `make run` and manually verify snapping, hotkeys, multi-monitor behavior where applicable, and Accessibility permission handling.
+Unit tests live in the `Tests/EpycZonesTests/` XCTest target, in files named `*Tests.swift`. They cover pure logic: snap geometry, zone hit-testing, edge resolution, and layout precedence. Keep new logic testable by separating it from `NSScreen`, Accessibility, and persisted state. There is no coverage requirement. Before every PR, run `make debug`, `make test` and `make strict`. For window-management or UI changes, also manually verify snapping, hotkeys, multi-monitor behavior where applicable, and Accessibility permission handling, with the bundle from `make bundle` launched by `open -n --env EPYCZONES_DATA_DIR=<copy>` against a copy of the data folder, never the user's own.
 
 ## Commit & Pull Request Guidelines
 

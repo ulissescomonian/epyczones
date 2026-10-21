@@ -34,14 +34,21 @@ shasum -a 256 -c EpycZones-<version>-arm64.dmg.sha256
 
 EpycZones needs macOS Accessibility permission because it inspects, moves, and
 resizes windows from other apps. It is not sandboxed and uses Accessibility,
-Core Graphics window information, global event monitoring, and Carbon hotkeys.
-Space-aware layout selection also depends on private macOS APIs.
+global event monitoring, and Carbon hotkeys. It reads window titles through
+Accessibility only and does not need the Screen Recording permission.
+Desktop-aware layout selection also depends on private macOS APIs.
 
 The application has no network client, cloud sync, account, analytics, or
 telemetry. It persists settings locally in `UserDefaults` and JSON files under
 `~/Library/Application Support/EpycZones/`. Some records contain application
-bundle identifiers, display names, and window titles, which can reveal document
-names or other sensitive context. Those files are not encrypted.
+bundle identifiers, display names and hardware IDs, and window titles, which
+can reveal document names or other sensitive context. Those files are not
+encrypted.
+
+The `EPYCZONES_DATA_DIR` environment variable points the app at another data
+folder. It exists for testing against a copy of the data; a normal launch from
+Finder, the Dock, or Login Items does not set it. Unit tests and screen renders
+always use a private temporary folder.
 
 ## Maintainer guidance
 
