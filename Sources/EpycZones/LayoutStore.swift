@@ -9,8 +9,15 @@ final class LayoutStore {
     var layouts: [Layout] = []
     var activeLayoutID: UUID?
 
-    /// Per-screen layout assignments. Key = NSScreen.localizedName.
-    var screenLayouts: [String: UUID] = [:]
+    /// Per-display layout assignments. Key = display UUID from
+    /// `CGDisplayCreateUUIDFromDisplayID`, which survives reconnections and
+    /// tells two monitors of the same model apart.
+    var displayLayouts: [String: UUID] = [:]
+
+    /// Assignments saved by 1.0.x, keyed by `NSScreen.localizedName`. Each one
+    /// moves to `displayLayouts` the first time a display with that name is
+    /// connected; displays not seen since keep theirs here.
+    private(set) var legacyScreenLayouts: [String: UUID] = [:]
 
     /// Per-space layout assignments. Key = Space UUID (persistent across reboots).
     var spaceLayouts: [String: UUID] = [:]
@@ -20,46 +27,46 @@ final class LayoutStore {
         layouts.first { $0.id == activeLayoutID }
     }
 
-    /// Active layout for a specific screen. Priority: per-space → per-screen → global default.
+    /// Active layout for a specific screen. Priority: per-space → per-display → global default.
     func activeLayout(for screen: NSScreen) -> Layout? {
         Self.resolveLayout(
             spaceUUID: SpaceDetector.shared.currentSpaceUUID(for: screen),
+            displayUUID: screen.displayUUID(),
             screenName: screen.localizedName,
             layouts: layouts,
             spaceLayouts: spaceLayouts,
-            screenLayouts: screenLayouts,
+            displayLayouts: displayLayouts,
+            legacyScreenLayouts: legacyScreenLayouts,
             defaultLayoutID: activeLayoutID
         )
     }
 
-    /// Pure precedence rule behind `activeLayout(for:)`: per-space → per-screen
-    /// → global default. An assignment whose layout no longer exists falls
-    /// through to the next level.
+    /// Pure precedence rule behind `activeLayout(for:)`: per-space →
+    /// per-display → not yet migrated per-name → global default. An
+    /// assignment whose layout no longer exists falls through to the next level.
     static func resolveLayout(
         spaceUUID: String?,
+        displayUUID: String?,
         screenName: String,
         layouts: [Layout],
         spaceLayouts: [String: UUID],
-        screenLayouts: [String: UUID],
+        displayLayouts: [String: UUID],
+        legacyScreenLayouts: [String: UUID] = [:],
         defaultLayoutID: UUID?
     ) -> Layout? {
-        // 1. Check per-space assignment
-        if let spaceUUID,
-           let id = spaceLayouts[spaceUUID],
-           let layout = layouts.first(where: { $0.id == id }) {
-            return layout
+        func layout(_ id: UUID?) -> Layout? {
+            guard let id else { return nil }
+            return layouts.first { $0.id == id }
         }
-        // 2. Check per-screen assignment
-        if let id = screenLayouts[screenName],
-           let layout = layouts.first(where: { $0.id == id }) {
-            return layout
-        }
-        // 3. Global default
-        return layouts.first { $0.id == defaultLayoutID }
+        if let spaceUUID, let match = layout(spaceLayouts[spaceUUID]) { return match }
+        if let displayUUID, let match = layout(displayLayouts[displayUUID]) { return match }
+        if let match = layout(legacyScreenLayouts[screenName]) { return match }
+        return layout(defaultLayoutID)
     }
 
     private init() {
         load()
+        migrateLegacyAssignments()
     }
 
     // MARK: - Persistence
@@ -72,7 +79,13 @@ final class LayoutStore {
     }
 
     func save() {
-        let model = StorageModel(layouts: layouts, activeLayoutID: activeLayoutID, screenLayouts: screenLayouts, spaceLayouts: spaceLayouts)
+        let model = StorageModel(
+            layouts: layouts,
+            activeLayoutID: activeLayoutID,
+            screenLayouts: legacyScreenLayouts,
+            displayLayouts: displayLayouts,
+            spaceLayouts: spaceLayouts
+        )
         guard let data = try? JSONEncoder().encode(model) else { return }
         try? data.write(to: fileURL, options: .atomic)
     }
@@ -82,8 +95,49 @@ final class LayoutStore {
               let model = try? JSONDecoder().decode(StorageModel.self, from: data) else { return }
         layouts = model.layouts
         activeLayoutID = model.activeLayoutID
-        screenLayouts = model.screenLayouts ?? [:]
+        legacyScreenLayouts = model.screenLayouts ?? [:]
+        displayLayouts = model.displayLayouts ?? [:]
         spaceLayouts = model.spaceLayouts ?? [:]
+    }
+
+    // MARK: - Display Migration
+
+    /// Moves name-keyed assignments onto the UUIDs of the connected displays
+    /// that carry those names. An existing UUID assignment wins; names with no
+    /// connected display stay legacy.
+    static func migrateLegacyAssignments(
+        _ legacy: [String: UUID],
+        into displayLayouts: [String: UUID],
+        connectedDisplays: [(name: String, uuid: String)]
+    ) -> (displayLayouts: [String: UUID], legacy: [String: UUID]) {
+        var migrated = displayLayouts
+        var remaining = legacy
+        for display in connectedDisplays {
+            guard let id = remaining.removeValue(forKey: display.name) else { continue }
+            if migrated[display.uuid] == nil {
+                migrated[display.uuid] = id
+            }
+        }
+        return (migrated, remaining)
+    }
+
+    /// Migrates legacy assignments for the displays connected now. Called at
+    /// launch and whenever the display configuration changes.
+    func migrateLegacyAssignments(for screens: [NSScreen] = NSScreen.screens) {
+        guard !legacyScreenLayouts.isEmpty else { return }
+        let connected = screens.compactMap { screen -> (name: String, uuid: String)? in
+            guard let uuid = screen.displayUUID() else { return nil }
+            return (name: screen.localizedName, uuid: uuid)
+        }
+        let result = Self.migrateLegacyAssignments(
+            legacyScreenLayouts,
+            into: displayLayouts,
+            connectedDisplays: connected
+        )
+        guard result.legacy != legacyScreenLayouts else { return }
+        displayLayouts = result.displayLayouts
+        legacyScreenLayouts = result.legacy
+        save()
     }
 
     // MARK: - CRUD
@@ -101,8 +155,12 @@ final class LayoutStore {
         if activeLayoutID == id {
             activeLayoutID = layouts.first?.id
         }
-        screenLayouts = screenLayouts.filter { entry in layouts.contains(where: { $0.id == entry.value }) }
-        spaceLayouts = spaceLayouts.filter { entry in layouts.contains(where: { $0.id == entry.value }) }
+        let isLive: (Dictionary<String, UUID>.Element) -> Bool = { entry in
+            self.layouts.contains { $0.id == entry.value }
+        }
+        displayLayouts = displayLayouts.filter(isLive)
+        legacyScreenLayouts = legacyScreenLayouts.filter(isLive)
+        spaceLayouts = spaceLayouts.filter(isLive)
         save()
     }
 
@@ -111,13 +169,13 @@ final class LayoutStore {
         save()
     }
 
-    func setActive(id: UUID, forScreen screenName: String) {
-        screenLayouts[screenName] = id
+    func setActive(id: UUID, forDisplay displayUUID: String) {
+        displayLayouts[displayUUID] = id
         save()
     }
 
-    func removeScreenAssignment(for screenName: String) {
-        screenLayouts.removeValue(forKey: screenName)
+    func removeDisplayAssignment(for displayUUID: String) {
+        displayLayouts.removeValue(forKey: displayUUID)
         save()
     }
 
@@ -131,42 +189,72 @@ final class LayoutStore {
         save()
     }
 
-    /// Cycle to the next layout for the screen under the mouse cursor.
-    /// Priority: per-space → per-screen → global default.
-    func cycleLayout() {
-        guard layouts.count > 1 else { return }
+    // MARK: - Cycling
 
-        let mouseScreen = NSScreen.screens.first(where: { $0.frame.contains(NSEvent.mouseLocation) })
-        let screenName = mouseScreen?.localizedName
-        let spaceUUID = mouseScreen.flatMap { SpaceDetector.shared.currentSpaceUUID(for: $0) }
+    /// Where the layout choice that applies to one screen is stored.
+    enum AssignmentScope: Equatable {
+        case space(String)
+        case display(String)
+        case global
+    }
 
-        // Determine current layout for this screen
-        let currentID: UUID?
-        if let uuid = spaceUUID, let id = spaceLayouts[uuid] {
-            currentID = id
-        } else if let name = screenName, let id = screenLayouts[name] {
-            currentID = id
-        } else {
-            currentID = activeLayoutID
+    /// The most specific scope with a live assignment for a screen, else the
+    /// global default.
+    static func effectiveScope(
+        spaceUUID: String?,
+        displayUUID: String?,
+        layouts: [Layout],
+        spaceLayouts: [String: UUID],
+        displayLayouts: [String: UUID]
+    ) -> AssignmentScope {
+        let liveIDs = Set(layouts.map(\.id))
+        if let spaceUUID, let id = spaceLayouts[spaceUUID], liveIDs.contains(id) {
+            return .space(spaceUUID)
+        }
+        if let displayUUID, let id = displayLayouts[displayUUID], liveIDs.contains(id) {
+            return .display(displayUUID)
+        }
+        return .global
+    }
+
+    /// The layout after `current` in library order, wrapping around.
+    static func nextLayoutID(after current: UUID?, in layouts: [Layout]) -> UUID? {
+        guard let first = layouts.first else { return nil }
+        guard let current, let index = layouts.firstIndex(where: { $0.id == current }) else {
+            return first.id
+        }
+        return layouts[(index + 1) % layouts.count].id
+    }
+
+    /// Advances the layout of `screen`, changing only the scope that decides
+    /// it, so cycling one display never changes the others.
+    @discardableResult
+    func cycleLayout(on screen: NSScreen) -> Layout? {
+        guard layouts.count > 1 else { return nil }
+
+        let spaceUUID = SpaceDetector.shared.currentSpaceUUID(for: screen)
+        let displayUUID = screen.displayUUID()
+        let scope = Self.effectiveScope(
+            spaceUUID: spaceUUID,
+            displayUUID: displayUUID,
+            layouts: layouts,
+            spaceLayouts: spaceLayouts,
+            displayLayouts: displayLayouts
+        )
+        guard let nextID = Self.nextLayoutID(after: activeLayout(for: screen)?.id, in: layouts) else {
+            return nil
         }
 
-        // Find next layout
-        let nextID: UUID
-        if let currentID = currentID,
-           let idx = layouts.firstIndex(where: { $0.id == currentID }) {
-            nextID = layouts[(idx + 1) % layouts.count].id
-        } else {
-            nextID = layouts.first!.id
-        }
-
-        // Apply to the correct target
-        if let uuid = spaceUUID, spaceLayouts[uuid] != nil {
+        switch scope {
+        case .space(let uuid):
             spaceLayouts[uuid] = nextID
-        } else if let name = screenName, screenLayouts[name] != nil {
-            screenLayouts[name] = nextID
+        case .display(let uuid):
+            displayLayouts[uuid] = nextID
+        case .global:
+            activeLayoutID = nextID
         }
-        activeLayoutID = nextID
         save()
+        return layouts.first { $0.id == nextID }
     }
 
     // MARK: - Storage Model
@@ -174,7 +262,9 @@ final class LayoutStore {
     private struct StorageModel: Codable {
         var layouts: [Layout]
         var activeLayoutID: UUID?
+        /// 1.0.x name-keyed assignments not yet migrated.
         var screenLayouts: [String: UUID]?
+        var displayLayouts: [String: UUID]?
         var spaceLayouts: [String: UUID]?
     }
 }

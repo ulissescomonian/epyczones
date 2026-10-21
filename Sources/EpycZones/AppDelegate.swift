@@ -23,6 +23,15 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             self.onSpaceChanged()
         }
 
+        // A display that connects may still carry a 1.0.x name-keyed layout assignment.
+        LayoutStore.shared.migrateLegacyAssignments()
+        NotificationCenter.default.addObserver(
+            forName: NSApplication.didChangeScreenParametersNotification,
+            object: nil, queue: .main
+        ) { _ in
+            LayoutStore.shared.migrateLegacyAssignments()
+        }
+
         // Hotkeys + window snapping require accessibility
         if AccessibilityChecker.isGranted {
             onAccessibilityReady()
@@ -52,7 +61,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         let space = SpaceDetector.shared.currentSpace(for: screen)
         let spaceLabel = space.map { "Space \($0.index)" } ?? "Space"
-        LayoutNotification.show(text: "\(spaceLabel): \(layout.name)")
+        LayoutNotification.show(text: "\(spaceLabel): \(layout.name)", on: screen)
     }
 
     private func onAccessibilityReady() {

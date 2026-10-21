@@ -69,28 +69,29 @@ struct LayoutEditorView: View {
 
             if NSScreen.screens.count > 1 {
                 Section("Screens") {
-                    ForEach(NSScreen.screens, id: \.localizedName) { screen in
-                        let screenName = screen.localizedName
-                        let currentID = store.screenLayouts[screenName]
-                        HStack {
-                            Image(systemName: "display")
-                                .imageScale(.small)
-                            Text(screenName)
-                                .lineLimit(1)
-                            Spacer()
-                        }
-                        Menu(currentID.flatMap { id in store.layouts.first { $0.id == id }?.name } ?? "Default") {
-                            Button("Default") {
-                                store.removeScreenAssignment(for: screenName)
+                    ForEach(NSScreen.screens, id: \.self) { screen in
+                        if let displayUUID = screen.displayUUID() {
+                            let currentID = store.displayLayouts[displayUUID]
+                            HStack {
+                                Image(systemName: "display")
+                                    .imageScale(.small)
+                                Text(screen.localizedName)
+                                    .lineLimit(1)
+                                Spacer()
                             }
-                            Divider()
-                            ForEach(store.layouts) { layout in
-                                Button(layout.name) {
-                                    store.setActive(id: layout.id, forScreen: screenName)
+                            Menu(currentID.flatMap { id in store.layouts.first { $0.id == id }?.name } ?? "Default") {
+                                Button("Default") {
+                                    store.removeDisplayAssignment(for: displayUUID)
+                                }
+                                Divider()
+                                ForEach(store.layouts) { layout in
+                                    Button(layout.name) {
+                                        store.setActive(id: layout.id, forDisplay: displayUUID)
+                                    }
                                 }
                             }
+                            .font(.caption)
                         }
-                        .font(.caption)
                     }
                 }
             }

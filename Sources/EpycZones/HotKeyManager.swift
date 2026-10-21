@@ -1,5 +1,5 @@
+import AppKit
 import Carbon
-import Foundation
 import OSLog
 
 // Carbon hotkey callback — must be a non-capturing function usable as a C function pointer.
@@ -84,8 +84,12 @@ final class HotKeyManager {
                     register(keyCode: b.keyCode, modifiers: b.modifiers) { WindowManager.moveToPreviousScreen() }
                 case .cycleLayout:
                     register(keyCode: b.keyCode, modifiers: b.modifiers) {
-                        LayoutStore.shared.cycleLayout()
-                        LayoutNotification.show()
+                        // Cycle the display under the cursor and announce it there.
+                        let mouseLocation = NSEvent.mouseLocation
+                        guard let screen = NSScreen.screens.first(where: { $0.frame.contains(mouseLocation) })
+                                ?? NSScreen.main,
+                              let layout = LayoutStore.shared.cycleLayout(on: screen) else { return }
+                        LayoutNotification.show(layout: layout, on: screen)
                     }
                 default: break
                 }

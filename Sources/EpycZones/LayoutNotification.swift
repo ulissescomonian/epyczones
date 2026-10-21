@@ -4,62 +4,36 @@ import AppKit
 enum LayoutNotification {
     private static var panel: NSPanel?
     private static var hideTimer: Timer?
+    /// Bumped on every show, so a fade that finishes late never hides a newer HUD.
+    private static var generation = 0
 
-    static func show() {
-        guard let layout = LayoutStore.shared.activeLayout else { return }
-        guard let screen = NSScreen.main else { return }
-
-        hideTimer?.invalidate()
-
-        let width: CGFloat = 260
-        let height: CGFloat = 60
-        let x = screen.frame.midX - width / 2
-        let y = screen.frame.midY - height / 2 + screen.frame.height * 0.25
-
-        let p = panel ?? {
-            let newPanel = NSPanel(
-                contentRect: .zero,
-                styleMask: [.borderless, .nonactivatingPanel],
-                backing: .buffered,
-                defer: false
-            )
-            newPanel.level = .floating
-            newPanel.backgroundColor = .clear
-            newPanel.isOpaque = false
-            newPanel.hasShadow = false
-            newPanel.ignoresMouseEvents = true
-            newPanel.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
-            panel = newPanel
-            return newPanel
-        }()
-
-        let view = LayoutNotificationView(name: layout.name, zoneCount: layout.zones.count)
-        p.contentView = view
-        p.setFrame(NSRect(x: x, y: y, width: width, height: height), display: true)
-        p.orderFrontRegardless()
-        p.alphaValue = 1.0
-
-        // Fade out after 1.2 seconds
-        hideTimer = Timer.scheduledTimer(withTimeInterval: 1.2, repeats: false) { _ in
-            NSAnimationContext.runAnimationGroup { ctx in
-                ctx.duration = 0.3
-                p.animator().alphaValue = 0
-            } completionHandler: {
-                p.orderOut(nil)
-            }
-        }
+    /// Shows the layout now in effect on `screen`, on that screen.
+    static func show(layout: Layout, on screen: NSScreen) {
+        present(
+            LayoutNotificationView(name: layout.name, zoneCount: layout.zones.count),
+            size: CGSize(width: 260, height: 60),
+            on: screen,
+            for: 1.2
+        )
     }
 
     /// Show a custom text notification (e.g. for Space moves).
-    static func show(text: String) {
-        guard let screen = NSScreen.main else { return }
+    static func show(text: String, on screen: NSScreen) {
+        present(
+            SimpleNotificationView(text: text),
+            size: CGSize(width: 320, height: 50),
+            on: screen,
+            for: 1.5
+        )
+    }
 
+    private static func present(_ view: NSView, size: CGSize, on screen: NSScreen, for duration: TimeInterval) {
         hideTimer?.invalidate()
+        generation += 1
+        let shownGeneration = generation
 
-        let width: CGFloat = 320
-        let height: CGFloat = 50
-        let x = screen.frame.midX - width / 2
-        let y = screen.frame.midY - height / 2 + screen.frame.height * 0.25
+        let x = screen.frame.midX - size.width / 2
+        let y = screen.frame.midY - size.height / 2 + screen.frame.height * 0.25
 
         let p = panel ?? {
             let newPanel = NSPanel(
@@ -78,17 +52,17 @@ enum LayoutNotification {
             return newPanel
         }()
 
-        let view = SimpleNotificationView(text: text)
         p.contentView = view
-        p.setFrame(NSRect(x: x, y: y, width: width, height: height), display: true)
+        p.setFrame(NSRect(x: x, y: y, width: size.width, height: size.height), display: true)
         p.orderFrontRegardless()
         p.alphaValue = 1.0
 
-        hideTimer = Timer.scheduledTimer(withTimeInterval: 1.5, repeats: false) { _ in
+        hideTimer = Timer.scheduledTimer(withTimeInterval: duration, repeats: false) { _ in
             NSAnimationContext.runAnimationGroup { ctx in
                 ctx.duration = 0.3
                 p.animator().alphaValue = 0
             } completionHandler: {
+                guard generation == shownGeneration else { return }
                 p.orderOut(nil)
             }
         }
