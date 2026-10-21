@@ -11,12 +11,13 @@ struct EpycZonesApp: App {
                 .environment(store)
         }
 
-        Window("Layout Editor", id: "layout-editor") {
-            LayoutEditorView()
+        Window("Layouts", id: "layout-editor") {
+            LayoutsView()
                 .environment(store)
                 .background(PrimaryWindowBridge(kind: .layoutEditor))
         }
-        .defaultSize(width: 860, height: 560)
+        .defaultSize(width: 1080, height: 720)
+        .windowResizability(.contentMinSize)
 
         Window("Settings", id: "settings") {
             SettingsView()
@@ -40,10 +41,10 @@ struct MenuBarView: View {
             Section("Layouts") {
                 ForEach(store.layouts) { layout in
                     Button {
-                        store.setActive(id: layout.id)
+                        store.assign(layout.id, to: .defaultLayout)
                     } label: {
                         HStack {
-                            if layout.id == store.activeLayoutID {
+                            if layout.id == store.defaultLayout.id {
                                 Image(systemName: "checkmark")
                             }
                             Text(layout.name)

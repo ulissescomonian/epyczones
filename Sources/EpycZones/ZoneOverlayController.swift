@@ -59,6 +59,21 @@ final class ZoneOverlayController {
         }
     }
 
+    /// Shows `layout` on one screen for a moment, as dragging would show it.
+    /// Used by the editor's Test on Display.
+    static func preview(_ layout: Layout, on screen: NSScreen) {
+        previewController.show { $0 == screen ? layout : nil }
+        previewTask?.cancel()
+        previewTask = Task { @MainActor in
+            try? await Task.sleep(for: .seconds(2.5))
+            guard !Task.isCancelled else { return }
+            previewController.hide()
+        }
+    }
+
+    private static let previewController = ZoneOverlayController()
+    private static var previewTask: Task<Void, Never>?
+
     func hide() {
         highlightedZoneIndices = []
         highlightedScreen = nil
@@ -87,12 +102,6 @@ final class ZoneOverlayNSView: NSView {
 
     /// Inset of each drawn zone from its slot, in points.
     private static let zoneInset: CGFloat = 4
-
-    private let zoneColors: [NSColor] = [
-        .systemBlue, .systemGreen, .systemOrange, .systemPurple,
-        .systemPink, .systemTeal, .systemIndigo, .systemMint,
-        .systemCyan, .systemRed,
-    ]
 
     init(layout: Layout, screenFrame: NSRect, visibleFrame: NSRect) {
         self.layout = layout
@@ -167,7 +176,7 @@ final class ZoneOverlayNSView: NSView {
 
         for (index, zone) in layout.zones.enumerated() {
             let isHighlighted = highlightedZoneIndices.contains(index)
-            let accentColor = zoneColors[index % zoneColors.count]
+            let accentColor = ZonePalette.nsColor(index)
 
             let rect = NSRect(
                 x: vfLocal.origin.x + zone.rect.x * vfLocal.width + gap,

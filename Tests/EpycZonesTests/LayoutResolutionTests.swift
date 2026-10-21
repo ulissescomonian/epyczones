@@ -2,9 +2,10 @@ import XCTest
 @testable import EpycZones
 
 final class LayoutResolutionTests: XCTestCase {
-    private let columns = Layout.twoColumns()
-    private let rows = Layout.twoRows()
-    private let grid = Layout.grid2x2()
+    /// User layouts with their own identifiers, as copies of templates are.
+    private let columns = Layout(name: "Columns", zones: Layout.template(.twoColumns).zones)
+    private let rows = Layout(name: "Rows", zones: Layout.template(.twoRows).zones)
+    private let grid = Layout(name: "Grid", zones: Layout.template(.grid).zones)
 
     private func resolve(
         space: String? = "space-1",
@@ -14,12 +15,12 @@ final class LayoutResolutionTests: XCTestCase {
         displayLayouts: [String: UUID] = [:],
         legacy: [String: UUID] = [:],
         defaultID: UUID?
-    ) -> Layout? {
-        LayoutStore.resolveLayout(
+    ) -> LayoutStore.Resolution {
+        LayoutStore.resolve(
             spaceUUID: space,
             displayUUID: display,
             screenName: name,
-            layouts: [columns, rows, grid],
+            library: [columns, rows, grid] + Layout.templates,
             spaceLayouts: spaceLayouts,
             displayLayouts: displayLayouts,
             legacyScreenLayouts: legacy,
@@ -30,53 +31,60 @@ final class LayoutResolutionTests: XCTestCase {
     // MARK: - Precedence
 
     func testSpaceAssignmentWinsOverDisplayAndDefault() {
-        let layout = resolve(
+        let result = resolve(
             spaceLayouts: ["space-1": rows.id],
             displayLayouts: ["display-4k": grid.id],
             defaultID: columns.id
         )
-        XCTAssertEqual(layout?.id, rows.id)
+        XCTAssertEqual(result, LayoutStore.Resolution(layout: rows, source: .space))
     }
 
     func testDisplayAssignmentWinsOverDefault() {
-        let layout = resolve(displayLayouts: ["display-4k": grid.id], defaultID: columns.id)
-        XCTAssertEqual(layout?.id, grid.id)
+        let result = resolve(displayLayouts: ["display-4k": grid.id], defaultID: columns.id)
+        XCTAssertEqual(result, LayoutStore.Resolution(layout: grid, source: .display))
     }
 
     func testDisplayAssignmentWinsOverAnUnmigratedName() {
-        let layout = resolve(
+        let result = resolve(
             displayLayouts: ["display-4k": grid.id],
             legacy: ["LG HDR 4K": rows.id],
             defaultID: columns.id
         )
-        XCTAssertEqual(layout?.id, grid.id)
+        XCTAssertEqual(result.layout.id, grid.id)
     }
 
     func testUnmigratedNameStillAppliesBeforeTheDefault() {
-        let layout = resolve(legacy: ["LG HDR 4K": rows.id], defaultID: columns.id)
-        XCTAssertEqual(layout?.id, rows.id)
+        let result = resolve(legacy: ["LG HDR 4K": rows.id], defaultID: columns.id)
+        XCTAssertEqual(result, LayoutStore.Resolution(layout: rows, source: .display))
     }
 
     func testDefaultAppliesWithoutAssignments() {
-        XCTAssertEqual(resolve(space: nil, display: nil, defaultID: columns.id)?.id, columns.id)
+        let result = resolve(space: nil, display: nil, defaultID: columns.id)
+        XCTAssertEqual(result, LayoutStore.Resolution(layout: columns, source: .defaultLayout))
     }
 
     func testAssignmentToADeletedLayoutFallsThrough() {
-        let layout = resolve(
+        let result = resolve(
             spaceLayouts: ["space-1": UUID()],
             displayLayouts: ["display-4k": UUID()],
             defaultID: columns.id
         )
-        XCTAssertEqual(layout?.id, columns.id)
+        XCTAssertEqual(result.layout.id, columns.id)
     }
 
-    func testOtherDisplaysAndSpacesAreIgnored() {
-        let layout = resolve(
+    func testWithoutAnyDefaultTheFallbackTemplateApplies() {
+        let result = resolve(
             spaceLayouts: ["space-2": rows.id],
             displayLayouts: ["display-portrait": grid.id],
             defaultID: nil
         )
-        XCTAssertNil(layout)
+        XCTAssertEqual(result, LayoutStore.Resolution(layout: LayoutStore.fallbackLayout, source: .defaultLayout))
+    }
+
+    func testTemplatesResolveByTheirFixedIdentifiers() {
+        let template = Layout.template(.mainAndStack)
+        let result = resolve(displayLayouts: ["display-4k": template.id], defaultID: nil)
+        XCTAssertEqual(result, LayoutStore.Resolution(layout: template, source: .display))
     }
 
     // MARK: - Migration from names
@@ -104,38 +112,13 @@ final class LayoutResolutionTests: XCTestCase {
 
     // MARK: - Cycling
 
-    func testCyclingChangesOnlyTheScopeThatDecidesTheScreen() {
-        let layouts = [columns, rows, grid]
-        XCTAssertEqual(
-            LayoutStore.effectiveScope(
-                spaceUUID: "space-1",
-                displayUUID: "display-4k",
-                layouts: layouts,
-                spaceLayouts: [:],
-                displayLayouts: ["display-4k": grid.id]
-            ),
-            .display("display-4k")
-        )
-        XCTAssertEqual(
-            LayoutStore.effectiveScope(
-                spaceUUID: "space-1",
-                displayUUID: "display-4k",
-                layouts: layouts,
-                spaceLayouts: ["space-1": rows.id],
-                displayLayouts: ["display-4k": grid.id]
-            ),
-            .space("space-1")
-        )
-        XCTAssertEqual(
-            LayoutStore.effectiveScope(
-                spaceUUID: nil,
-                displayUUID: "display-4k",
-                layouts: layouts,
-                spaceLayouts: [:],
-                displayLayouts: ["display-4k": UUID()]
-            ),
-            .global
-        )
+    func testCyclingStepsThroughTheUsersLayoutsWhenThereAreSeveral() {
+        XCTAssertEqual(LayoutStore.cycleCandidates(userLayouts: [columns, rows]), [columns, rows])
+    }
+
+    func testCyclingAddsTheTemplatesWhenTheUserHasFewLayouts() {
+        XCTAssertEqual(LayoutStore.cycleCandidates(userLayouts: []), Layout.templates)
+        XCTAssertEqual(LayoutStore.cycleCandidates(userLayouts: [grid]), [grid] + Layout.templates)
     }
 
     func testNextLayoutWrapsAround() {
@@ -143,6 +126,8 @@ final class LayoutResolutionTests: XCTestCase {
         XCTAssertEqual(LayoutStore.nextLayoutID(after: columns.id, in: layouts), rows.id)
         XCTAssertEqual(LayoutStore.nextLayoutID(after: grid.id, in: layouts), columns.id)
         XCTAssertEqual(LayoutStore.nextLayoutID(after: nil, in: layouts), columns.id)
+        // A layout outside the cycle, such as a template, restarts it.
+        XCTAssertEqual(LayoutStore.nextLayoutID(after: Layout.template(.grid).id, in: layouts), columns.id)
         XCTAssertNil(LayoutStore.nextLayoutID(after: nil, in: []))
     }
 }

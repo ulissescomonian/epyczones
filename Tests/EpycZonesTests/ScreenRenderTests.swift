@@ -46,6 +46,50 @@ final class ScreenRenderTests: XCTestCase {
         }
     }
 
+    func testRenderLayouts() async throws {
+        let directory = try XCTUnwrap(outputDirectory)
+        let displays = DisplayInfo.connected()
+        let main = try XCTUnwrap(displays.first(where: \.isPrimary))
+        let portrait = displays.first(where: \.isPortrait) ?? main
+        let size = CGSize(width: 1080, height: 760)
+
+        func render(_ name: String, dark: Bool, display: DisplayInfo, session: LayoutEditSession? = nil) async throws {
+            let view = LayoutsView(displays: displays, selectedDisplayID: display.id, session: session)
+                .environment(Samples.layoutStore())
+            try await ScreenRenderer.render(
+                view,
+                size: size,
+                dark: dark,
+                to: directory.appendingPathComponent("layouts-\(name)-\(dark ? "dark" : "light").png")
+            )
+        }
+
+        for dark in [false, true] {
+            try await render("browse-main", dark: dark, display: main)
+            let grid = LayoutEditSession(editing: Samples.grid, display: main, applyOnSave: nil)
+            grid.selection = Samples.grid.zones[1].id
+            try await render("editor-main", dark: dark, display: main, session: grid)
+        }
+        try await render("browse-portrait", dark: false, display: portrait)
+
+        let rows = LayoutEditSession(editing: Samples.rows, display: portrait, applyOnSave: nil)
+        rows.setName("Chat", of: Samples.rows.zones[1].id)
+        try await render("editor-portrait", dark: false, display: portrait, session: rows)
+
+        let template = LayoutEditSession(
+            editing: Layout.template(.mainAndStack),
+            copyName: "Main and Stack Copy",
+            display: main,
+            applyOnSave: .display(main.id)
+        )
+        if let first = template.zones.first?.id {
+            template.perform { $0[0].rect.width = 0.5 }
+            template.selection = first
+        }
+        template.addZone()
+        try await render("editor-issues", dark: false, display: main, session: template)
+    }
+
     func testRenderAppRuleEditor() async throws {
         let directory = try XCTUnwrap(outputDirectory)
         var draft = AppRuleDraft()
@@ -85,6 +129,8 @@ enum ScreenRenderer {
             defer: false
         )
         window.isReleasedWhenClosed = false
+        // No fade-in: a capture during it comes out washed out.
+        window.animationBehavior = .none
         window.appearance = NSAppearance(named: dark ? .darkAqua : .aqua)
         window.toolbarStyle = .unified
         window.contentViewController = hosting
@@ -95,29 +141,57 @@ enum ScreenRenderer {
         window.orderFrontRegardless()
         defer { window.close() }
 
-        // Let SwiftUI lay out, resolve the toolbar and finish first-frame animations.
-        try await Task.sleep(for: .milliseconds(900))
-
-        let shareable = try await SCShareableContent.excludingDesktopWindows(false, onScreenWindowsOnly: false)
-        guard let captured = shareable.windows.first(where: { $0.windowID == CGWindowID(window.windowNumber) }) else {
-            throw RenderError.windowNotFound
+        // Let SwiftUI lay out, resolve the toolbar and finish first-frame
+        // animations; capture again while the window still looks unsettled.
+        var image: CGImage?
+        for attempt in 0..<5 {
+            try await Task.sleep(for: .milliseconds(attempt == 0 ? 1000 : 700))
+            guard let captured = try? await capture(window) else { continue }
+            image = captured
+            if hasContrast(captured) { break }
         }
-        let configuration = SCStreamConfiguration()
-        configuration.width = Int(window.frame.width * window.backingScaleFactor)
-        configuration.height = Int(window.frame.height * window.backingScaleFactor)
-        configuration.showsCursor = false
-        configuration.ignoreShadowsSingleWindow = true
-        let image = try await SCScreenshotManager.captureImage(
-            contentFilter: SCContentFilter(desktopIndependentWindow: captured),
-            configuration: configuration
-        )
+        guard let image else { throw RenderError.capture }
         guard let png = NSBitmapImageRep(cgImage: image).representation(using: .png, properties: [:]) else {
             throw RenderError.encoding
         }
         try png.write(to: url)
     }
 
-    enum RenderError: Error { case windowNotFound, encoding }
+    private static func capture(_ window: NSWindow) async throws -> CGImage {
+        let shareable = try await SCShareableContent.excludingDesktopWindows(false, onScreenWindowsOnly: false)
+        guard let captured = shareable.windows.first(where: { $0.windowID == CGWindowID(window.windowNumber) }) else {
+            throw RenderError.capture
+        }
+        let configuration = SCStreamConfiguration()
+        configuration.width = Int(window.frame.width * window.backingScaleFactor)
+        configuration.height = Int(window.frame.height * window.backingScaleFactor)
+        configuration.showsCursor = false
+        configuration.ignoreShadowsSingleWindow = true
+        return try await SCScreenshotManager.captureImage(
+            contentFilter: SCContentFilter(desktopIndependentWindow: captured),
+            configuration: configuration
+        )
+    }
+
+    /// False for a blank or faded capture: every real screen has text, so
+    /// some pixels are far darker or lighter than others.
+    private static func hasContrast(_ image: CGImage) -> Bool {
+        let rep = NSBitmapImageRep(cgImage: image)
+        var lowest = 1.0
+        var highest = 0.0
+        let step = max(1, min(rep.pixelsWide, rep.pixelsHigh) / 120)
+        for y in stride(from: 0, to: rep.pixelsHigh, by: step) {
+            for x in stride(from: 0, to: rep.pixelsWide, by: step) {
+                guard let color = rep.colorAt(x: x, y: y)?.usingColorSpace(.deviceRGB) else { continue }
+                let luminance = 0.2126 * color.redComponent + 0.7152 * color.greenComponent + 0.0722 * color.blueComponent
+                lowest = min(lowest, luminance)
+                highest = max(highest, luminance)
+            }
+        }
+        return highest - lowest > 0.6
+    }
+
+    enum RenderError: Error { case capture, encoding }
 }
 
 /// A window that reports itself as key and accepts any frame.
@@ -140,22 +214,27 @@ enum Samples {
         Zone(rect: RelativeRect(x: 0, y: 0.625, width: 0.5, height: 0.375)),
         Zone(rect: RelativeRect(x: 0.5, y: 0.625, width: 0.5, height: 0.375)),
     ])
-    static let rows = Layout.twoRows()
-    static let columns = Layout.threeColumns()
-    static let focus = Layout.focusCenter()
+    static let rows = Layout(name: "2 Rows", zones: Layout.template(.twoRows).zones.map { Zone(rect: $0.rect) })
+    static let coding = Layout(name: "Coding", zones: [
+        Zone(rect: RelativeRect(x: 0, y: 0, width: 0.625, height: 1), name: "Editor"),
+        Zone(rect: RelativeRect(x: 0.625, y: 0, width: 0.375, height: 0.5), name: "Browser"),
+        Zone(rect: RelativeRect(x: 0.625, y: 0.5, width: 0.375, height: 0.5), name: "Terminal"),
+    ])
 
-    /// The real displays, the first one on Grid 2×2 and the others on 2 Rows.
+    /// The real displays, the main one on Grid 2×2 and the others on 2 Rows,
+    /// plus a display that is not connected.
     static func layoutStore() -> LayoutStore {
-        var displays: [String: UUID] = [:]
+        var displays: [String: UUID] = ["sample-disconnected": coding.id]
         for (index, screen) in NSScreen.screens.enumerated() {
             if let uuid = screen.displayUUID() {
                 displays[uuid] = index == 0 ? grid.id : rows.id
             }
         }
         return .inMemory(
-            layouts: [grid, rows, columns, focus],
+            layouts: [grid, rows, coding],
             defaultLayoutID: grid.id,
-            displayLayouts: displays
+            displayLayouts: displays,
+            displayNames: ["sample-disconnected": "ARZOPA (1)"]
         )
     }
 

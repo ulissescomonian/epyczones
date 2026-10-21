@@ -132,8 +132,8 @@ enum WindowManager {
         animated: Bool = true
     ) {
         guard AccessibilityChecker.isGranted else { return }
-        guard let layout = LayoutStore.shared.activeLayout(for: screen),
-              layout.zones.indices.contains(index) else { return }
+        let layout = LayoutStore.shared.layout(for: screen)
+        guard layout.zones.indices.contains(index) else { return }
 
         let gap = AppSettings.shared.zoneGap
         let zone = layout.zones[index]

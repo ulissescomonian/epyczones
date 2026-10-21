@@ -15,31 +15,6 @@ final class RelativeRectTests: XCTestCase {
         XCTAssertEqual(topRight.frame(in: screen, gap: 10), CGRect(x: 610, y: 460, width: 480, height: 380))
     }
 
-    func testClampKeepsTheRectInsideTheUnitSquare() {
-        var rect = RelativeRect(x: 0.8, y: -0.2, width: 0.5, height: 0.5)
-        rect.clamp()
-        XCTAssertEqual(rect.x, 0.5, accuracy: 1e-9)
-        XCTAssertEqual(rect.y, 0, accuracy: 1e-9)
-        XCTAssertLessThanOrEqual(rect.x + rect.width, 1 + 1e-9)
-        XCTAssertLessThanOrEqual(rect.y + rect.height, 1 + 1e-9)
-    }
-
-    func testClampEnforcesAMinimumSize() {
-        var rect = RelativeRect(x: 0.2, y: 0.2, width: 0.001, height: 0)
-        rect.clamp()
-        XCTAssertEqual(rect.width, 0.05, accuracy: 1e-9)
-        XCTAssertEqual(rect.height, 0.05, accuracy: 1e-9)
-    }
-
-    func testSnapToGridRoundsToTheNearestDivision() {
-        var rect = RelativeRect(x: 0.26, y: 0.49, width: 0.24, height: 0.51)
-        rect.snapToGrid(divisions: 4)
-        XCTAssertEqual(rect.x, 0.25, accuracy: 1e-9)
-        XCTAssertEqual(rect.y, 0.5, accuracy: 1e-9)
-        XCTAssertEqual(rect.width, 0.25, accuracy: 1e-9)
-        XCTAssertEqual(rect.height, 0.5, accuracy: 1e-9)
-    }
-
     func testRelativeFrameIsTheInverseOfFrameIn() {
         let window = CGRect(x: 350, y: 210, width: 420, height: 300)
         let relative = RelativeRect(frame: window, in: screen)
@@ -53,7 +28,7 @@ final class RelativeRectTests: XCTestCase {
     }
 
     func testBoundingCoversEveryZone() {
-        let grid = Layout.grid2x2().zones
+        let grid = Layout.template(.grid).zones
         XCTAssertEqual(RelativeRect.bounding(grid), RelativeRect.full)
         XCTAssertEqual(
             RelativeRect.bounding([grid[0], grid[1]]),

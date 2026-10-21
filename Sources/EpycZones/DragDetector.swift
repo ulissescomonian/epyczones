@@ -305,7 +305,7 @@ final class DragDetector {
     /// handlers ask on every mouse event, and resolving can query Spaces.
     private func gestureLayout(for screen: NSScreen) -> Layout? {
         if let cached = gestureLayouts[screen] { return cached }
-        let resolved = LayoutStore.shared.activeLayout(for: screen)
+        let resolved = LayoutStore.shared.layout(for: screen)
         gestureLayouts[screen] = .some(resolved)
         return resolved
     }

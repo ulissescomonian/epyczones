@@ -82,10 +82,10 @@ struct SnappingSettingsPane: View {
         .formStyle(.grouped)
     }
 
-    /// Zones of the layout on the main display, or two columns when there is none.
+    /// Zones of the layout on the main display, or two columns when it has none.
     private var previewZones: [Zone] {
-        let zones = NSScreen.main.flatMap { store.activeLayout(for: $0)?.zones } ?? []
-        return zones.isEmpty ? Layout.twoColumns().zones : zones
+        let zones = NSScreen.main.map { store.layout(for: $0).zones } ?? []
+        return zones.isEmpty ? LayoutStore.fallbackLayout.zones : zones
     }
 }
 

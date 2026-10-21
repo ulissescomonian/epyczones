@@ -1,3 +1,4 @@
+import AppKit
 import SwiftUI
 
 // MARK: - Palette
@@ -9,8 +10,18 @@ enum ZonePalette {
         .blue, .orange, .green, .purple, .pink, .teal, .indigo, .yellow, .mint, .red,
     ]
 
+    /// The same colors for AppKit drawing, such as the drag overlay.
+    static let nsColors: [NSColor] = [
+        .systemBlue, .systemOrange, .systemGreen, .systemPurple, .systemPink,
+        .systemTeal, .systemIndigo, .systemYellow, .systemMint, .systemRed,
+    ]
+
     static func color(_ index: Int) -> Color {
         colors[index % colors.count]
+    }
+
+    static func nsColor(_ index: Int) -> NSColor {
+        nsColors[index % nsColors.count]
     }
 }
 

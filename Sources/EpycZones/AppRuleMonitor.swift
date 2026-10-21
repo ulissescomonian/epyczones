@@ -112,8 +112,8 @@ final class AppRuleMonitor {
         case .position(let position):
             targetNS = position.frame(in: screen.visibleFrame)
         case .zone(let index):
-            guard let layout = LayoutStore.shared.activeLayout(for: screen),
-                  index < layout.zones.count else { return }
+            let layout = LayoutStore.shared.layout(for: screen)
+            guard index < layout.zones.count else { return }
             targetNS = layout.zones[index].rect.frame(in: screen.visibleFrame, gap: AppSettings.shared.zoneGap)
         }
         WindowManager.applySnap(targetNS, to: window, animated: false)

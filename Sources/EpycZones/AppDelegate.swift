@@ -26,13 +26,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             MainActor.assumeIsolated { self.onSpaceChanged() }
         }
 
-        // A display that connects may still carry a 1.0.x name-keyed layout assignment.
-        LayoutStore.shared.migrateLegacyAssignments()
+        // Remember display names, and migrate 1.0.x name-keyed assignments
+        // of displays that connect.
+        LayoutStore.shared.noteConnectedDisplays()
         NotificationCenter.default.addObserver(
             forName: NSApplication.didChangeScreenParametersNotification,
             object: nil, queue: .main
         ) { _ in
-            MainActor.assumeIsolated { LayoutStore.shared.migrateLegacyAssignments() }
+            MainActor.assumeIsolated { LayoutStore.shared.noteConnectedDisplays() }
         }
 
         // Hotkeys + window snapping require accessibility
@@ -60,12 +61,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         guard !LayoutStore.shared.spaceLayouts.isEmpty,
               let screen = NSScreen.main,
               let spaceUUID = SpaceDetector.shared.currentSpaceUUID(for: screen),
-              let _ = LayoutStore.shared.spaceLayouts[spaceUUID],
-              let layout = LayoutStore.shared.activeLayout(for: screen) else { return }
+              LayoutStore.shared.spaceLayouts[spaceUUID] != nil else { return }
 
-        let space = SpaceDetector.shared.currentSpace(for: screen)
-        let spaceLabel = space.map { "Space \($0.index)" } ?? "Space"
-        LayoutNotification.show(text: "\(spaceLabel): \(layout.name)", on: screen)
+        let layout = LayoutStore.shared.layout(for: screen)
+        let text = SpaceDetector.shared.currentSpace(for: screen).map {
+            String(localized: "Desktop \($0.index): \(layout.name)")
+        } ?? layout.name
+        LayoutNotification.show(text: text, on: screen)
     }
 
     private func onAccessibilityReady() {

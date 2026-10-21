@@ -111,7 +111,7 @@ private struct TargetThumbnail: View {
             PositionMap(rect: position.previewRect)
         case .zone(let index):
             let screen = NSScreen.main ?? NSScreen.screens.first
-            let zones = screen.flatMap { store.activeLayout(for: $0)?.zones } ?? []
+            let zones = screen.map { store.layout(for: $0).zones } ?? []
             ZoneMap(zones: zones, highlighted: [index])
         }
     }
@@ -278,7 +278,7 @@ struct AppRuleEditor: View {
             }
         }
         let screen = screens.indices.contains(previewScreenIndex) ? screens[previewScreenIndex] : screens.first
-        let zones = screen.flatMap { layoutStore.activeLayout(for: $0)?.zones } ?? []
+        let zones = screen.map { layoutStore.layout(for: $0).zones } ?? []
         let aspect = screen.map { $0.visibleFrame.width / max(1, $0.visibleFrame.height) } ?? 16.0 / 10.0
 
         if zones.isEmpty {

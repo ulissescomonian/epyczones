@@ -86,7 +86,7 @@ enum WindowPersistence {
         for (recordIndex, openIndex) in matches {
             let record = records[recordIndex]
             guard let screen = NSScreen.matching(displayUUID: record.displayUUID, name: record.screenName),
-                  let layout = LayoutStore.shared.layouts.first(where: { $0.id == record.layoutID }),
+                  let layout = LayoutStore.shared.layout(id: record.layoutID),
                   layout.zones.indices.contains(record.zoneIndex) else { continue }
 
             let targetNS = layout.zones[record.zoneIndex].rect.frame(
