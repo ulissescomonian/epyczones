@@ -151,8 +151,10 @@ struct SettingsView: View {
                 recorder.start(action)
             }
         } label: {
+            // The prompt is proportional: in monospace it overflows the 100 pt button.
             Text(isRecording ? "Press keys…" : binding.displayString)
-                .font(.system(.body, design: .monospaced))
+                .font(.system(.body, design: isRecording ? .default : .monospaced))
+                .lineLimit(1)
                 .foregroundStyle(isRecording ? .orange : .primary)
                 .frame(maxWidth: .infinity)
         }
