@@ -27,43 +27,43 @@ enum SnapPosition: String, CaseIterable, Codable {
 
     var displayName: String {
         switch self {
-        case .leftHalf:            return "Left Half"
-        case .rightHalf:           return "Right Half"
-        case .topHalf:             return "Top Half"
-        case .bottomHalf:          return "Bottom Half"
-        case .centerHalf:          return "Center Half"
-        case .topLeftQuarter:      return "Top Left"
-        case .topRightQuarter:     return "Top Right"
-        case .bottomLeftQuarter:   return "Bottom Left"
-        case .bottomRightQuarter:  return "Bottom Right"
-        case .firstThird:          return "First Third"
-        case .centerThird:         return "Center Third"
-        case .lastThird:           return "Last Third"
-        case .firstTwoThirds:      return "First Two Thirds"
-        case .centerTwoThirds:     return "Center Two Thirds"
-        case .lastTwoThirds:       return "Last Two Thirds"
-        case .firstFourth:         return "First Fourth"
-        case .secondFourth:        return "Second Fourth"
-        case .thirdFourth:         return "Third Fourth"
-        case .lastFourth:          return "Last Fourth"
-        case .firstThreeFourths:   return "First Three Fourths"
-        case .centerThreeFourths:  return "Center Three Fourths"
-        case .lastThreeFourths:    return "Last Three Fourths"
-        case .topLeftSixth:        return "Top Left Sixth"
-        case .topCenterSixth:      return "Top Center Sixth"
-        case .topRightSixth:       return "Top Right Sixth"
-        case .bottomLeftSixth:     return "Bottom Left Sixth"
-        case .bottomCenterSixth:   return "Bottom Center Sixth"
-        case .bottomRightSixth:    return "Bottom Right Sixth"
-        case .maximize:            return "Maximize"
-        case .almostMaximize:      return "Almost Maximize"
-        case .maximizeHeight:      return "Maximize Height"
-        case .center:              return "Center"
-        case .dockLeft:            return "Dock Left"
-        case .dockRight:           return "Dock Right"
-        case .makeSmaller:         return "Make Smaller"
-        case .makeLarger:          return "Make Larger"
-        case .restore:             return "Restore"
+        case .leftHalf:            return String(localized: "Left Half")
+        case .rightHalf:           return String(localized: "Right Half")
+        case .topHalf:             return String(localized: "Top Half")
+        case .bottomHalf:          return String(localized: "Bottom Half")
+        case .centerHalf:          return String(localized: "Center Half")
+        case .topLeftQuarter:      return String(localized: "Top Left")
+        case .topRightQuarter:     return String(localized: "Top Right")
+        case .bottomLeftQuarter:   return String(localized: "Bottom Left")
+        case .bottomRightQuarter:  return String(localized: "Bottom Right")
+        case .firstThird:          return String(localized: "First Third")
+        case .centerThird:         return String(localized: "Center Third")
+        case .lastThird:           return String(localized: "Last Third")
+        case .firstTwoThirds:      return String(localized: "First Two Thirds")
+        case .centerTwoThirds:     return String(localized: "Center Two Thirds")
+        case .lastTwoThirds:       return String(localized: "Last Two Thirds")
+        case .firstFourth:         return String(localized: "First Fourth")
+        case .secondFourth:        return String(localized: "Second Fourth")
+        case .thirdFourth:         return String(localized: "Third Fourth")
+        case .lastFourth:          return String(localized: "Last Fourth")
+        case .firstThreeFourths:   return String(localized: "First Three Fourths")
+        case .centerThreeFourths:  return String(localized: "Center Three Fourths")
+        case .lastThreeFourths:    return String(localized: "Last Three Fourths")
+        case .topLeftSixth:        return String(localized: "Top Left Sixth")
+        case .topCenterSixth:      return String(localized: "Top Center Sixth")
+        case .topRightSixth:       return String(localized: "Top Right Sixth")
+        case .bottomLeftSixth:     return String(localized: "Bottom Left Sixth")
+        case .bottomCenterSixth:   return String(localized: "Bottom Center Sixth")
+        case .bottomRightSixth:    return String(localized: "Bottom Right Sixth")
+        case .maximize:            return String(localized: "Maximize")
+        case .almostMaximize:      return String(localized: "Almost Maximize")
+        case .maximizeHeight:      return String(localized: "Maximize Height")
+        case .center:              return String(localized: "Center")
+        case .dockLeft:            return String(localized: "Dock Left")
+        case .dockRight:           return String(localized: "Dock Right")
+        case .makeSmaller:         return String(localized: "Make Smaller")
+        case .makeLarger:          return String(localized: "Make Larger")
+        case .restore:             return String(localized: "Restore")
         }
     }
 

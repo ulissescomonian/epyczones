@@ -20,7 +20,9 @@ final class HotKeyRecorder {
     @ObservationIgnored private var keyMonitor: Any?
     @ObservationIgnored private var resignObserver: NSObjectProtocol?
 
-    private static let hint = "Type the new shortcut. ⎋ cancels, ⌫ removes it."
+    private static var hint: String {
+        String(localized: "Press the new shortcut. Esc cancels, Delete removes it.")
+    }
 
     deinit {
         // Owned by SwiftUI view state, which is released on the main thread.
@@ -81,9 +83,9 @@ final class HotKeyRecorder {
             AppSettings.shared.customHotKeys[action.rawValue] = binding
             stop()
         case .needsModifier:
-            reject("\(binding.displayString) needs ⌃, ⌥ or ⌘.")
+            reject(String(localized: "\(binding.displayString) needs ⌃, ⌥ or ⌘."))
         case .conflict(let owner):
-            reject("\(binding.displayString) is already used by \(owner).")
+            reject(String(localized: "\(binding.displayString) is already used by \(owner)."))
         }
         return nil
     }

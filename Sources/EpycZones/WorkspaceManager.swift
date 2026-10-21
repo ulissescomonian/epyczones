@@ -36,11 +36,10 @@ enum WorkspaceManager {
         let missingApps: [String]
 
         var summary: String {
-            var text = "Moved \(moved) of \(total) windows."
-            if !missingApps.isEmpty {
-                text += " Not found: \(missingApps.joined(separator: ", "))."
-            }
-            return text
+            let movedText = String(localized: "Moved \(moved) of \(total) windows.")
+            guard !missingApps.isEmpty else { return movedText }
+            let apps = missingApps.formatted(.list(type: .and))
+            return movedText + " " + String(localized: "Not open: \(apps).")
         }
     }
 

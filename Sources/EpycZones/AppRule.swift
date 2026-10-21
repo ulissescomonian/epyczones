@@ -12,7 +12,7 @@ struct AppRule: Identifiable, Codable, Equatable {
         var displayName: String {
             switch self {
             case .position(let p): return p.displayName
-            case .zone(let i):     return "Zone \(i + 1) (active layout)"
+            case .zone(let i):     return String(localized: "Zone \(i + 1)")
             }
         }
     }

@@ -1,5 +1,5 @@
 import Carbon
-import Foundation
+import SwiftUI
 
 /// Persistable hotkey binding: a key code + modifier flags.
 struct HotKeyBinding: Codable, Equatable {
@@ -97,66 +97,79 @@ enum HotKeyAction: String, CaseIterable, Identifiable {
 
     var displayName: String {
         switch self {
-        case .leftHalf:           return "Left Half"
-        case .rightHalf:          return "Right Half"
-        case .topHalf:            return "Top Half"
-        case .bottomHalf:         return "Bottom Half"
-        case .centerHalf:         return "Center Half"
-        case .topLeftQuarter:     return "Top Left"
-        case .topRightQuarter:    return "Top Right"
-        case .bottomLeftQuarter:  return "Bottom Left"
-        case .bottomRightQuarter: return "Bottom Right"
-        case .firstThird:         return "First Third"
-        case .centerThird:        return "Center Third"
-        case .lastThird:          return "Last Third"
-        case .firstTwoThirds:     return "First Two Thirds"
-        case .centerTwoThirds:    return "Center Two Thirds"
-        case .lastTwoThirds:      return "Last Two Thirds"
-        case .firstFourth:        return "First Fourth"
-        case .secondFourth:       return "Second Fourth"
-        case .thirdFourth:        return "Third Fourth"
-        case .lastFourth:         return "Last Fourth"
-        case .topLeftSixth:       return "Top Left Sixth"
-        case .topCenterSixth:     return "Top Center Sixth"
-        case .topRightSixth:      return "Top Right Sixth"
-        case .bottomLeftSixth:    return "Bottom Left Sixth"
-        case .bottomCenterSixth:  return "Bottom Center Sixth"
-        case .bottomRightSixth:   return "Bottom Right Sixth"
-        case .maximize:           return "Maximize"
-        case .almostMaximize:     return "Almost Maximize"
-        case .maximizeHeight:     return "Maximize Height"
-        case .center:             return "Center"
-        case .makeSmaller:        return "Make Smaller"
-        case .makeLarger:         return "Make Larger"
-        case .restore:            return "Restore"
-        case .dockLeft:           return "Dock Left"
-        case .dockRight:          return "Dock Right"
-        case .nextMonitor:        return "Next Display"
-        case .prevMonitor:        return "Previous Display"
-        case .cycleLayout:        return "Cycle Layout"
+        case .leftHalf:           return String(localized: "Left Half")
+        case .rightHalf:          return String(localized: "Right Half")
+        case .topHalf:            return String(localized: "Top Half")
+        case .bottomHalf:         return String(localized: "Bottom Half")
+        case .centerHalf:         return String(localized: "Center Half")
+        case .topLeftQuarter:     return String(localized: "Top Left")
+        case .topRightQuarter:    return String(localized: "Top Right")
+        case .bottomLeftQuarter:  return String(localized: "Bottom Left")
+        case .bottomRightQuarter: return String(localized: "Bottom Right")
+        case .firstThird:         return String(localized: "First Third")
+        case .centerThird:        return String(localized: "Center Third")
+        case .lastThird:          return String(localized: "Last Third")
+        case .firstTwoThirds:     return String(localized: "First Two Thirds")
+        case .centerTwoThirds:    return String(localized: "Center Two Thirds")
+        case .lastTwoThirds:      return String(localized: "Last Two Thirds")
+        case .firstFourth:        return String(localized: "First Fourth")
+        case .secondFourth:       return String(localized: "Second Fourth")
+        case .thirdFourth:        return String(localized: "Third Fourth")
+        case .lastFourth:         return String(localized: "Last Fourth")
+        case .topLeftSixth:       return String(localized: "Top Left Sixth")
+        case .topCenterSixth:     return String(localized: "Top Center Sixth")
+        case .topRightSixth:      return String(localized: "Top Right Sixth")
+        case .bottomLeftSixth:    return String(localized: "Bottom Left Sixth")
+        case .bottomCenterSixth:  return String(localized: "Bottom Center Sixth")
+        case .bottomRightSixth:   return String(localized: "Bottom Right Sixth")
+        case .maximize:           return String(localized: "Maximize")
+        case .almostMaximize:     return String(localized: "Almost Maximize")
+        case .maximizeHeight:     return String(localized: "Maximize Height")
+        case .center:             return String(localized: "Center")
+        case .makeSmaller:        return String(localized: "Make Smaller")
+        case .makeLarger:         return String(localized: "Make Larger")
+        case .restore:            return String(localized: "Restore")
+        case .dockLeft:           return String(localized: "Dock Left")
+        case .dockRight:          return String(localized: "Dock Right")
+        case .nextMonitor:        return String(localized: "Next Display")
+        case .prevMonitor:        return String(localized: "Previous Display")
+        case .cycleLayout:        return String(localized: "Cycle Layout")
         }
     }
 
-    var category: String {
+    var category: HotKeyCategory {
         switch self {
         case .leftHalf, .rightHalf, .topHalf, .bottomHalf, .centerHalf:
-            return "Halves"
+            return .halves
         case .topLeftQuarter, .topRightQuarter, .bottomLeftQuarter, .bottomRightQuarter:
-            return "Quarters"
+            return .quarters
         case .firstThird, .centerThird, .lastThird:
-            return "Thirds"
+            return .thirds
         case .firstTwoThirds, .centerTwoThirds, .lastTwoThirds:
-            return "Two Thirds"
+            return .twoThirds
         case .firstFourth, .secondFourth, .thirdFourth, .lastFourth:
-            return "Fourths"
+            return .fourths
         case .topLeftSixth, .topCenterSixth, .topRightSixth,
              .bottomLeftSixth, .bottomCenterSixth, .bottomRightSixth:
-            return "Sixths"
+            return .sixths
         case .maximize, .almostMaximize, .maximizeHeight, .center, .makeSmaller, .makeLarger, .restore,
              .dockLeft, .dockRight:
-            return "Special"
+            return .special
         case .nextMonitor, .prevMonitor, .cycleLayout:
-            return "Navigation"
+            return .navigation
+        }
+    }
+
+    /// An SF Symbol for actions that are not a place on the screen.
+    var symbol: String? {
+        switch self {
+        case .makeSmaller: return "arrow.down.right.and.arrow.up.left"
+        case .makeLarger: return "arrow.up.left.and.arrow.down.right"
+        case .restore: return "arrow.uturn.backward"
+        case .nextMonitor: return "arrow.right.to.line"
+        case .prevMonitor: return "arrow.left.to.line"
+        case .cycleLayout: return "square.grid.2x2"
+        default: return nil
         }
     }
 
@@ -246,6 +259,26 @@ enum HotKeyAction: String, CaseIterable, Identifiable {
         case .nextMonitor:        return HotKeyBinding(keyCode: UInt32(kVK_ANSI_N), modifiers: mods)
         case .prevMonitor:        return HotKeyBinding(keyCode: UInt32(kVK_ANSI_P), modifiers: mods)
         case .cycleLayout:        return HotKeyBinding(keyCode: UInt32(kVK_ANSI_L), modifiers: mods)
+        }
+    }
+}
+
+/// Groups of actions, in the order the Shortcuts settings show them.
+enum HotKeyCategory: CaseIterable, Identifiable {
+    case halves, quarters, thirds, twoThirds, fourths, sixths, special, navigation
+
+    var id: Self { self }
+
+    var title: LocalizedStringKey {
+        switch self {
+        case .halves: return "Halves"
+        case .quarters: return "Quarters"
+        case .thirds: return "Thirds"
+        case .twoThirds: return "Two Thirds"
+        case .fourths: return "Fourths"
+        case .sixths: return "Sixths"
+        case .special: return "Size and Position"
+        case .navigation: return "Displays and Layouts"
         }
     }
 }

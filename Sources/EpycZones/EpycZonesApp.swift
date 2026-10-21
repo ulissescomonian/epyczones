@@ -20,9 +20,13 @@ struct EpycZonesApp: App {
 
         Window("Settings", id: "settings") {
             SettingsView()
+                .environment(store)
+                .environment(AppRuleStore.shared)
+                .environment(WorkspaceStore.shared)
                 .background(PrimaryWindowBridge(kind: .settings))
         }
-        .defaultSize(width: 560, height: 420)
+        .defaultSize(width: 840, height: 660)
+        .windowResizability(.contentMinSize)
     }
 }
 
