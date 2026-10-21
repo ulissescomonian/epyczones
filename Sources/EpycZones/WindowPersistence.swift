@@ -46,7 +46,7 @@ enum WindowPersistence {
     /// Record that a window was snapped to a zone.
     static func record(window: AXUIElement, zoneIndex: Int, screen: NSScreen, layoutID: UUID) {
         guard let bundleID = bundleID(of: window) else { return }
-        let title = WindowManager.title(of: window) ?? ""
+        let title = AXWindow.title(of: window) ?? ""
 
         // Remove old record for this window
         records.removeAll { $0.bundleID == bundleID && $0.windowTitle == title }
@@ -83,7 +83,7 @@ enum WindowPersistence {
         let open = WindowManager.openAppWindows { recordedApps.contains($0) }
         let matches = WindowMatcher.match(
             saved: records.map { WindowMatcher.Window(bundleID: $0.bundleID, title: $0.windowTitle) },
-            open: open.map { WindowMatcher.Window(bundleID: $0.bundleID, title: WindowManager.title(of: $0.window) ?? "") }
+            open: open.map { WindowMatcher.Window(bundleID: $0.bundleID, title: AXWindow.title(of: $0.window) ?? "") }
         )
 
         var restored = 0

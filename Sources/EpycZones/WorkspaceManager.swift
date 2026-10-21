@@ -71,12 +71,12 @@ enum WorkspaceManager {
         var entries: [Workspace.Entry] = []
 
         for (window, bundleID) in WindowManager.openAppWindows() {
-            guard let frame = WindowManager.frame(of: window),
+            guard let frame = AXWindow.frame(of: window),
                   let screen = WindowManager.screenForWindow(window) else { continue }
 
             entries.append(Workspace.Entry(
                 bundleID: bundleID,
-                windowTitle: WindowManager.title(of: window) ?? "",
+                windowTitle: AXWindow.title(of: window) ?? "",
                 screenName: screen.localizedName,
                 displayUUID: screen.displayUUID(),
                 relativeFrame: RelativeRect(frame: frame, in: screen.visibleFrame)
@@ -100,7 +100,7 @@ enum WorkspaceManager {
         let open = WindowManager.openAppWindows { savedApps.contains($0) }
         let matches = WindowMatcher.match(
             saved: workspace.entries.map { WindowMatcher.Window(bundleID: $0.bundleID, title: $0.windowTitle) },
-            open: open.map { WindowMatcher.Window(bundleID: $0.bundleID, title: WindowManager.title(of: $0.window) ?? "") }
+            open: open.map { WindowMatcher.Window(bundleID: $0.bundleID, title: AXWindow.title(of: $0.window) ?? "") }
         )
 
         var moved = 0

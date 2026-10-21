@@ -2,7 +2,7 @@
 
 ## Project Structure & Module Organization
 
-EpycZones is a Swift 5.9 executable package targeting macOS 14. Application code lives in `Sources/EpycZones/`. Keep files grouped by responsibility: SwiftUI entry points and views (`EpycZonesApp.swift`, `SettingsView.swift`), layout and persistence models (`Layout.swift`, `LayoutStore.swift`), and macOS integrations (`WindowManager.swift`, `DragDetector.swift`, `HotKeyManager.swift`). `Resources/` contains the bundle plist and canonical 1024 px PNG app icon; `screenshots/` contains README assets; `scripts/` contains reproducible icon, app, and DMG packaging. Build products under `.build/` and `dist/` are ignored and must not be committed.
+EpycZones is a Swift 5.9 executable package targeting macOS 14. Application code lives in `Sources/EpycZones/`. Keep files grouped by responsibility: SwiftUI entry points and views (`EpycZonesApp.swift`, `SettingsView.swift`), layout and persistence models (`Layout.swift`, `LayoutStore.swift`), snapping logic (`WindowManager.swift`, `SnapHistory.swift`, `PostDragSnapCoordinator.swift`), Accessibility primitives and window lookup (`AXWindow.swift`, `WindowTargeting.swift`), and other macOS integrations (`DragDetector.swift`, `HotKeyManager.swift`). Convert between AppKit and Accessibility coordinates only through `ScreenCoordinates`, and write window frames only through `WindowManager.applyFrame`. `Resources/` contains the bundle plist and canonical 1024 px PNG app icon; `screenshots/` contains README assets; `scripts/` contains reproducible icon, app, and DMG packaging. Build products under `.build/` and `dist/` are ignored and must not be committed.
 
 ## Build, Test, and Development Commands
 

@@ -24,21 +24,18 @@ enum WindowAnimator {
         isCurrent: @escaping () -> Bool = { true },
         completion: ((Bool) -> Void)? = nil
     ) {
-        let primaryHeight = NSScreen.screens[0].frame.height
-
         // Get current window frame in AX coords
-        guard let currentPos = WindowManager.getPosition(of: window),
-              let currentSize = WindowManager.getSize(of: window) else {
+        guard let currentPos = AXWindow.position(of: window),
+              let currentSize = AXWindow.size(of: window) else {
             // Fallback: instant snap on main thread
             DispatchQueue.main.async {
-                let succeeded = applyAX(window: window, targetNS: targetNS, primaryHeight: primaryHeight)
-                finish(succeeded: succeeded, completion: completion)
+                finish(succeeded: AXWindow.setFrame(targetNS, of: window), completion: completion)
             }
             return
         }
 
-        // Target in AX coords
-        let targetAX = CGPoint(x: targetNS.origin.x, y: primaryHeight - targetNS.origin.y - targetNS.height)
+        // Interpolate in AX coords: the top-left corner travels in a straight line.
+        let targetAX = ScreenCoordinates.axOrigin(of: targetNS)
         let targetSize = targetNS.size
 
         let stepInterval = totalDuration / Double(steps)
@@ -59,44 +56,18 @@ enum WindowAnimator {
                 let w = currentSize.width + (targetSize.width - currentSize.width) * t
                 let h = currentSize.height + (targetSize.height - currentSize.height) * t
 
-                let size = CGSize(width: w, height: h)
-                let pos = CGPoint(x: x, y: y)
-
-                // Rectangle's approach: SIZE → POSITION → SIZE
-                let firstSizeSucceeded = setAX(window, size: size)
-                let positionSucceeded = setAX(window, position: pos)
-                let finalSizeSucceeded = setAX(window, size: size)
-                result.succeeded = result.succeeded
-                    && firstSizeSucceeded
-                    && positionSucceeded
-                    && finalSizeSucceeded
+                let stepFrame = ScreenCoordinates.nsFrame(
+                    axOrigin: CGPoint(x: x, y: y),
+                    size: CGSize(width: w, height: h)
+                )
+                let stepSucceeded = AXWindow.setFrame(stepFrame, of: window)
+                result.succeeded = result.succeeded && stepSucceeded
 
                 if i == steps {
                     finish(succeeded: result.succeeded, completion: completion)
                 }
             }
         }
-    }
-
-    private static func applyAX(window: AXUIElement, targetNS: CGRect, primaryHeight: CGFloat) -> Bool {
-        let size = CGSize(width: targetNS.width, height: targetNS.height)
-        let pos = CGPoint(x: targetNS.origin.x, y: primaryHeight - targetNS.origin.y - targetNS.height)
-        let firstSizeSucceeded = setAX(window, size: size)
-        let positionSucceeded = setAX(window, position: pos)
-        let finalSizeSucceeded = setAX(window, size: size)
-        return firstSizeSucceeded && positionSucceeded && finalSizeSucceeded
-    }
-
-    private static func setAX(_ window: AXUIElement, position: CGPoint) -> Bool {
-        var p = position
-        guard let val = AXValueCreate(.cgPoint, &p) else { return false }
-        return AXUIElementSetAttributeValue(window, kAXPositionAttribute as CFString, val) == .success
-    }
-
-    private static func setAX(_ window: AXUIElement, size: CGSize) -> Bool {
-        var s = size
-        guard let val = AXValueCreate(.cgSize, &s) else { return false }
-        return AXUIElementSetAttributeValue(window, kAXSizeAttribute as CFString, val) == .success
     }
 
     private static func finish(succeeded: Bool, completion: ((Bool) -> Void)?) {

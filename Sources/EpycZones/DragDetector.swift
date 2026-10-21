@@ -321,7 +321,7 @@ final class DragDetector {
     private func isWindowMoving() -> Bool {
         if windowHasMoved { return true }
         guard let w = draggedWindow, let startPos = windowStartPos,
-              let currentPos = WindowManager.getPosition(of: w) else { return false }
+              let currentPos = AXWindow.position(of: w) else { return false }
         let threshold: CGFloat = 3.0
         windowHasMoved = abs(currentPos.x - startPos.x) > threshold || abs(currentPos.y - startPos.y) > threshold
         return windowHasMoved
@@ -334,11 +334,11 @@ final class DragDetector {
     private func captureDraggedWindowIfNeeded() {
         if draggedWindow == nil, let window = WindowManager.windowForDrag(at: NSEvent.mouseLocation) {
             draggedWindow = window
-            pendingDragRestoreSize = WindowManager.dragRestoreSize(for: window)
+            pendingDragRestoreSize = SnapHistory.dragRestoreSize(for: window)
         }
 
         if windowStartPos == nil, let window = draggedWindow {
-            windowStartPos = WindowManager.getPosition(of: window)
+            windowStartPos = AXWindow.position(of: window)
         }
     }
 

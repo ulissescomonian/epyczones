@@ -10,21 +10,21 @@ final class PostDragProgressTests: XCTestCase {
 
     func testReachingTheTargetWithinToleranceSucceeds() {
         let actual = CGRect(x: 999, y: 1, width: 401, height: 600)
-        XCTAssertTrue(WindowManager.frameReachedOrAdvanced(from: dropped, to: actual, toward: target))
+        XCTAssertTrue(PostDragSnapCoordinator.frameReachedOrAdvanced(from: dropped, to: actual, toward: target))
     }
 
     func testClampedSizeThatMovedTowardTheTargetSucceeds() {
         // The app enforces a 500 pt minimum width but did move and shrink.
         let actual = CGRect(x: 1000, y: 0, width: 500, height: 600)
-        XCTAssertTrue(WindowManager.frameReachedOrAdvanced(from: dropped, to: actual, toward: target))
+        XCTAssertTrue(PostDragSnapCoordinator.frameReachedOrAdvanced(from: dropped, to: actual, toward: target))
     }
 
     func testAWindowThatDidNotMoveFails() {
-        XCTAssertFalse(WindowManager.frameReachedOrAdvanced(from: dropped, to: dropped, toward: target))
+        XCTAssertFalse(PostDragSnapCoordinator.frameReachedOrAdvanced(from: dropped, to: dropped, toward: target))
     }
 
     func testMovingAwayFromTheTargetFails() {
         let actual = CGRect(x: -200, y: 0, width: 800, height: 600)
-        XCTAssertFalse(WindowManager.frameReachedOrAdvanced(from: dropped, to: actual, toward: target))
+        XCTAssertFalse(PostDragSnapCoordinator.frameReachedOrAdvanced(from: dropped, to: actual, toward: target))
     }
 }
