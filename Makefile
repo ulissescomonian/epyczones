@@ -1,13 +1,17 @@
 APP_NAME := EpycZones
 APP_BUNDLE := .build/$(APP_NAME).app
 
-.PHONY: build debug test icon bundle run dmg clean
+.PHONY: build debug test strict icon bundle run dmg clean
 
 debug:
 	swift build
 
 test:
 	swift test
+
+# Swift 6 concurrency checking, with every diagnostic treated as an error.
+strict:
+	swift build --build-path .build/strict -Xswiftc -strict-concurrency=complete -Xswiftc -warnings-as-errors
 
 build:
 	swift build -c release --arch arm64

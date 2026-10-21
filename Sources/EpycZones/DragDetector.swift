@@ -8,6 +8,7 @@ import OSLog
 /// Uses NSEvent global + local monitors.
 /// Global monitors track events to other apps; local monitors track events to our app
 /// (needed when overlay panels are showing and our app receives focus).
+@MainActor
 final class DragDetector {
     private let overlay = ZoneOverlayController()
     private let snapPreview = SnapPreviewController()
@@ -347,10 +348,13 @@ final class DragDetector {
     private func startEdgeSnapTimer() {
         isWaitingForEdgeSnap = true
         edgeSnapTimer = Timer.scheduledTimer(withTimeInterval: AppSettings.shared.edgeSnapDelay, repeats: false) { [weak self] _ in
-            guard let self = self, self.isWaitingForEdgeSnap, self.isDragging else { return }
-            self.isWaitingForEdgeSnap = false
-            if let target = EdgeSnapResolver.resolve(at: NSEvent.mouseLocation) {
-                self.snapPreview.show(target)
+            // Scheduled on the main run loop, so the block runs on the main thread.
+            MainActor.assumeIsolated {
+                guard let self = self, self.isWaitingForEdgeSnap, self.isDragging else { return }
+                self.isWaitingForEdgeSnap = false
+                if let target = EdgeSnapResolver.resolve(at: NSEvent.mouseLocation) {
+                    self.snapPreview.show(target)
+                }
             }
         }
     }

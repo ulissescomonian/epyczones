@@ -2,6 +2,7 @@ import AppKit
 import ApplicationServices
 
 /// Saves and restores complete workspace snapshots (all visible windows + their zone positions).
+@MainActor
 enum WorkspaceManager {
 
     struct Workspace: Codable, Identifiable, Equatable {

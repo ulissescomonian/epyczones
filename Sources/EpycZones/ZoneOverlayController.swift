@@ -1,6 +1,7 @@
 import AppKit
 
 /// Manages transparent overlay panels that show zone regions on screen.
+@MainActor
 final class ZoneOverlayController {
     private var panels: [NSPanel] = []
     private var overlayViews: [ZoneOverlayNSView] = []

@@ -5,6 +5,7 @@ import ApplicationServices
 /// path that writes the resulting frame. Accessibility primitives live in
 /// `AXWindow`, window lookup in `WindowTargeting.swift`, per-window memory in
 /// `SnapHistory`, and drop handling in `PostDragSnapCoordinator`.
+@MainActor
 enum WindowManager {
 
     // MARK: - Public

@@ -4,6 +4,7 @@ import OSLog
 
 /// Animates window snapping with smooth interpolation.
 /// All AX calls are dispatched to the main thread (required by macOS Tahoe).
+@MainActor
 enum WindowAnimator {
     private static let steps = 8
     private static let totalDuration: TimeInterval = 0.15

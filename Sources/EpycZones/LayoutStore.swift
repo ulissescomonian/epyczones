@@ -3,6 +3,7 @@ import Foundation
 import Observation
 
 @Observable
+@MainActor
 final class LayoutStore {
     static let shared = LayoutStore()
 
@@ -50,7 +51,7 @@ final class LayoutStore {
     /// Pure precedence rule behind `activeLayout(for:)`: per-space →
     /// per-display → not yet migrated per-name → global default. An
     /// assignment whose layout no longer exists falls through to the next level.
-    static func resolveLayout(
+    nonisolated static func resolveLayout(
         spaceUUID: String?,
         displayUUID: String?,
         screenName: String,
@@ -111,7 +112,7 @@ final class LayoutStore {
     /// Moves name-keyed assignments onto the UUIDs of the connected displays
     /// that carry those names. An existing UUID assignment wins; names with no
     /// connected display stay legacy.
-    static func migrateLegacyAssignments(
+    nonisolated static func migrateLegacyAssignments(
         _ legacy: [String: UUID],
         into displayLayouts: [String: UUID],
         connectedDisplays: [(name: String, uuid: String)]
@@ -206,7 +207,7 @@ final class LayoutStore {
 
     /// The most specific scope with a live assignment for a screen, else the
     /// global default.
-    static func effectiveScope(
+    nonisolated static func effectiveScope(
         spaceUUID: String?,
         displayUUID: String?,
         layouts: [Layout],
@@ -224,7 +225,7 @@ final class LayoutStore {
     }
 
     /// The layout after `current` in library order, wrapping around.
-    static func nextLayoutID(after current: UUID?, in layouts: [Layout]) -> UUID? {
+    nonisolated static func nextLayoutID(after current: UUID?, in layouts: [Layout]) -> UUID? {
         guard let first = layouts.first else { return nil }
         guard let current, let index = layouts.firstIndex(where: { $0.id == current }) else {
             return first.id

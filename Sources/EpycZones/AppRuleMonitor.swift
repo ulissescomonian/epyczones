@@ -3,6 +3,7 @@ import ApplicationServices
 
 /// Watches apps that have rules and auto-snaps their new windows.
 /// Uses one AXObserver per ruled app (kAXWindowCreatedNotification).
+@MainActor
 final class AppRuleMonitor {
     static let shared = AppRuleMonitor()
 
@@ -21,14 +22,14 @@ final class AppRuleMonitor {
             object: nil, queue: .main
         ) { [weak self] note in
             guard let app = note.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication else { return }
-            self?.observeIfRuled(app)
+            MainActor.assumeIsolated { self?.observeIfRuled(app) }
         }
         nc.addObserver(
             forName: NSWorkspace.didTerminateApplicationNotification,
             object: nil, queue: .main
         ) { [weak self] note in
             guard let app = note.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication else { return }
-            self?.removeObserver(pid: app.processIdentifier)
+            MainActor.assumeIsolated { self?.removeObserver(pid: app.processIdentifier) }
         }
         reload()
     }

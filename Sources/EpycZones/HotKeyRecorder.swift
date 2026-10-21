@@ -9,6 +9,7 @@ import Observation
 /// the button again, leaving the tab, closing the window or switching apps)
 /// therefore has to end in `stop()`, which registers them again.
 @Observable
+@MainActor
 final class HotKeyRecorder {
     /// The action being recorded, or nil when idle.
     private(set) var action: HotKeyAction?
@@ -22,9 +23,12 @@ final class HotKeyRecorder {
     private static let hint = "Type the new shortcut. ⎋ cancels, ⌫ removes it."
 
     deinit {
-        guard action != nil else { return }
-        removeMonitors()
-        HotKeyManager.shared.reloadHotKeys()
+        // Owned by SwiftUI view state, which is released on the main thread.
+        MainActor.assumeIsolated {
+            guard action != nil else { return }
+            removeMonitors()
+            HotKeyManager.shared.reloadHotKeys()
+        }
     }
 
     func start(_ newAction: HotKeyAction) {
@@ -108,7 +112,7 @@ final class HotKeyRecorder {
             object: nil,
             queue: .main
         ) { [weak self] _ in
-            self?.stop()
+            MainActor.assumeIsolated { self?.stop() }
         }
     }
 

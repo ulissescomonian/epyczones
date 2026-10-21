@@ -5,6 +5,7 @@ import ApplicationServices
 /// AX size and position writes asynchronously, so each phase waits for the
 /// window to settle before the next write is sent, and a direct attempt
 /// falls back once through a safe position before restoring the dropped frame.
+@MainActor
 final class PostDragSnapCoordinator {
     private struct Geometry {
         let axPosition: CGPoint
@@ -391,7 +392,7 @@ final class PostDragSnapCoordinator {
     /// A constrained window may not reach the requested size exactly. It is a
     /// successful snap when every requested component is either within the
     /// normal tolerance or has measurably moved toward its requested value.
-    static func frameReachedOrAdvanced(from before: CGRect, to after: CGRect, toward target: CGRect) -> Bool {
+    nonisolated static func frameReachedOrAdvanced(from before: CGRect, to after: CGRect, toward target: CGRect) -> Bool {
         let tolerance: CGFloat = 2
         let values: [(CGFloat, CGFloat, CGFloat)] = [
             (before.origin.x, after.origin.x, target.origin.x),

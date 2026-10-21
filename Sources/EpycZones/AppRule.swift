@@ -32,6 +32,7 @@ struct AppRule: Identifiable, Codable, Equatable {
 
 /// Persists app rules to ~/Library/Application Support/EpycZones/app-rules.json.
 @Observable
+@MainActor
 final class AppRuleStore {
     static let shared = AppRuleStore()
 

@@ -1,7 +1,10 @@
 import AppKit
 
+@MainActor
 class AppDelegate: NSObject, NSApplicationDelegate {
     private let dragDetector = DragDetector()
+    /// Polls until Accessibility is granted, then stops.
+    private var accessibilityPoll: Timer?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)
@@ -20,7 +23,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             forName: NSWorkspace.activeSpaceDidChangeNotification,
             object: nil, queue: .main
         ) { _ in
-            self.onSpaceChanged()
+            MainActor.assumeIsolated { self.onSpaceChanged() }
         }
 
         // A display that connects may still carry a 1.0.x name-keyed layout assignment.
@@ -29,7 +32,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             forName: NSApplication.didChangeScreenParametersNotification,
             object: nil, queue: .main
         ) { _ in
-            LayoutStore.shared.migrateLegacyAssignments()
+            MainActor.assumeIsolated { LayoutStore.shared.migrateLegacyAssignments() }
         }
 
         // Hotkeys + window snapping require accessibility
@@ -79,10 +82,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     private func pollAccessibility() {
-        Timer.scheduledTimer(withTimeInterval: 2.0, repeats: true) { [weak self] timer in
-            if AccessibilityChecker.isGranted {
-                timer.invalidate()
-                self?.onAccessibilityReady()
+        // Scheduled on the main run loop, so the block runs on the main thread.
+        accessibilityPoll = Timer.scheduledTimer(withTimeInterval: 2.0, repeats: true) { [weak self] _ in
+            MainActor.assumeIsolated {
+                guard let self, AccessibilityChecker.isGranted else { return }
+                self.accessibilityPoll?.invalidate()
+                self.accessibilityPoll = nil
+                self.onAccessibilityReady()
             }
         }
     }

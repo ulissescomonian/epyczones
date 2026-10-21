@@ -5,6 +5,7 @@ import Foundation
 /// Per-window memory of snaps: the undo stack for Restore, the step of the
 /// repeated half-width cycle, and the size to give back when a snapped window
 /// is dragged away.
+@MainActor
 enum SnapHistory {
 
     // MARK: - Undo

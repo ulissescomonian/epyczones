@@ -3,6 +3,7 @@ import AppKit
 /// Shows a translucent "ghost" of the frame a window will snap to when dropped
 /// near a screen edge. The panel itself is the ghost — its frame is the snap
 /// target frame — so switching targets animates the panel sliding/morphing.
+@MainActor
 final class SnapPreviewController {
     private var panel: NSPanel?
     private(set) var target: EdgeSnapResolver.Target?

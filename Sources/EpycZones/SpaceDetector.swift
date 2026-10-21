@@ -46,6 +46,7 @@ extension NSScreen {
 // MARK: - Space Detector
 
 /// Detects macOS Spaces using private CGS APIs. Space UUIDs are persistent across reboots.
+@MainActor
 final class SpaceDetector {
     static let shared = SpaceDetector()
 

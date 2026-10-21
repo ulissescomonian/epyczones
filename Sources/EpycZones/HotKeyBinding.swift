@@ -237,6 +237,7 @@ enum HotKeyAction: String, CaseIterable, Identifiable {
 }
 
 /// Resolve binding: custom if set, otherwise default.
+@MainActor
 func resolvedBinding(for action: HotKeyAction) -> HotKeyBinding {
     AppSettings.shared.customHotKeys[action.rawValue] ?? action.defaultBinding
 }

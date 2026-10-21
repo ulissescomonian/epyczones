@@ -8,6 +8,7 @@ EpycZones is a Swift 5.9 executable package targeting macOS 14. Application code
 
 - `make debug` runs a fast development build with `swift build`.
 - `make test` runs the unit tests with `swift test`.
+- `make strict` builds with Swift 6 strict concurrency and fails on any warning. App types are `@MainActor`; system callbacks that already run on the main thread enter it with `MainActor.assumeIsolated`, and pure helpers stay `nonisolated` so tests can call them.
 - `make build` creates the release executable.
 - `make icon` regenerates and validates `.build/AppIcon.icns` from `Resources/AppIcon.png`.
 - `make bundle` builds and assembles the local `.build/EpycZones.app`; it is a development artifact, not a distributable release.
@@ -32,7 +33,7 @@ Use four-space indentation and opening braces on the declaration line. Name type
 
 ## Testing Guidelines
 
-Unit tests live in the `Tests/EpycZonesTests/` XCTest target, in files named `*Tests.swift`. They cover pure logic: snap geometry, zone hit-testing, edge resolution, and layout precedence. Keep new logic testable by separating it from `NSScreen`, Accessibility, and persisted state. There is no coverage requirement. Before every PR, run `make debug` and `make test`. For window-management or UI changes, also run `make run` and manually verify snapping, hotkeys, multi-monitor behavior where applicable, and Accessibility permission handling.
+Unit tests live in the `Tests/EpycZonesTests/` XCTest target, in files named `*Tests.swift`. They cover pure logic: snap geometry, zone hit-testing, edge resolution, and layout precedence. Keep new logic testable by separating it from `NSScreen`, Accessibility, and persisted state. There is no coverage requirement. Before every PR, run `make debug`, `make test` and `make strict`. For window-management or UI changes, also run `make run` and manually verify snapping, hotkeys, multi-monitor behavior where applicable, and Accessibility permission handling.
 
 ## Commit & Pull Request Guidelines
 

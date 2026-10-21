@@ -2,6 +2,7 @@ import ApplicationServices
 import AppKit
 import OSLog
 
+@MainActor
 enum AccessibilityChecker {
     /// Upper bound, in seconds, for each Accessibility request this process
     /// sends. AX calls run synchronously on the main thread, so the system
@@ -25,7 +26,9 @@ enum AccessibilityChecker {
 
     /// Show the Accessibility prompt if permission is not granted.
     static func requestAccess() {
-        let options = [kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String: true] as CFDictionary
+        // The value of kAXTrustedCheckOptionPrompt, spelled out: the imported
+        // global is a mutable C variable that strict concurrency rejects.
+        let options = ["AXTrustedCheckOptionPrompt": true] as CFDictionary
         AXIsProcessTrustedWithOptions(options)
     }
 }

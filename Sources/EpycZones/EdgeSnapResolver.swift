@@ -3,6 +3,7 @@ import AppKit
 /// Resolves a cursor position near a screen edge to a fixed snap target,
 /// Aero Snap style: edges → halves, corners → quarters.
 /// Independent of the active layout — layout zones are the Shift+drag path.
+@MainActor
 enum EdgeSnapResolver {
     struct Target: Equatable {
         let position: SnapPosition
@@ -35,7 +36,7 @@ enum EdgeSnapResolver {
     /// - Parameter neighborFrames: Other displays. Where one of them continues
     ///   past an edge at the cursor's position, that stretch of edge is a
     ///   passage to it, not a snap target.
-    static func position(
+    nonisolated static func position(
         at point: NSPoint,
         in f: CGRect,
         threshold: Double,

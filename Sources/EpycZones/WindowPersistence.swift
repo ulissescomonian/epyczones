@@ -3,6 +3,7 @@ import ApplicationServices
 import OSLog
 
 /// Records which windows were snapped to which zones and restores them on launch.
+@MainActor
 enum WindowPersistence {
 
     // MARK: - Data Model

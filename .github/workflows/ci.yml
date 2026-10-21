@@ -31,6 +31,9 @@ jobs:
       - name: Run unit tests
         run: swift test
 
+      - name: Check Swift 6 concurrency
+        run: make strict
+
       - name: Build Release configuration
         run: swift build -c release
 

@@ -5,6 +5,7 @@ import OSLog
 /// Accessibility primitives for other apps' windows: reading and writing
 /// geometry, identity and state, plus throttled diagnostics. Frames are in
 /// AppKit coordinates unless a name says AX.
+@MainActor
 enum AXWindow {
 
     // MARK: - Geometry
@@ -246,7 +247,8 @@ enum AXWindow {
     // MARK: - Diagnostics
 
     private static var lastLogTimes: [String: TimeInterval] = [:]
-    private static let logThrottleInterval: TimeInterval = 5
+    /// A plain constant; nonisolated so it can serve as a default argument.
+    nonisolated private static let logThrottleInterval: TimeInterval = 5
 
     static func log(_ operation: String, error: AXError, for element: AXUIElement) {
         let pid = processID(of: element)

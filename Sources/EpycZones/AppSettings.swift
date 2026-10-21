@@ -6,6 +6,7 @@ import ServiceManagement
 
 /// Global app settings, persisted to UserDefaults.
 @Observable
+@MainActor
 final class AppSettings {
     static let shared = AppSettings()
 

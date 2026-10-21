@@ -3,12 +3,14 @@ import Carbon
 import OSLog
 
 // Carbon hotkey callback — must be a non-capturing function usable as a C function pointer.
+// The handler is installed once, by the HotKeyManager singleton, so it
+// dispatches to `HotKeyManager.shared` instead of decoding its user data.
 private func carbonHotKeyCallback(
     _: EventHandlerCallRef?,
     _ event: EventRef?,
-    _ userData: UnsafeMutableRawPointer?
+    _: UnsafeMutableRawPointer?
 ) -> OSStatus {
-    guard let event = event, let userData = userData else {
+    guard let event = event else {
         return OSStatus(eventNotHandledErr)
     }
 
@@ -24,11 +26,16 @@ private func carbonHotKeyCallback(
     )
     guard status == noErr else { return status }
 
-    let manager = Unmanaged<HotKeyManager>.fromOpaque(userData).takeUnretainedValue()
-    manager.handleHotKey(id: hotKeyID.id)
+    // Carbon delivers hotkeys through the application event target, which
+    // dispatches on the main thread.
+    let id = hotKeyID.id
+    MainActor.assumeIsolated {
+        HotKeyManager.shared.handleHotKey(id: id)
+    }
     return noErr
 }
 
+@MainActor
 final class HotKeyManager {
     static let shared = HotKeyManager()
 
@@ -55,14 +62,12 @@ final class HotKeyManager {
             eventKind: UInt32(kEventHotKeyPressed)
         )
 
-        let selfPtr = UnsafeMutableRawPointer(Unmanaged.passUnretained(self).toOpaque())
-
         InstallEventHandler(
             GetApplicationEventTarget(),
             carbonHotKeyCallback,
             1,
             &eventType,
-            selfPtr,
+            nil,
             &eventHandlerRef
         )
     }
@@ -155,12 +160,6 @@ final class HotKeyManager {
         handlers[id]?()
     }
 
-    deinit {
-        for ref in hotKeyRefs {
-            UnregisterEventHotKey(ref)
-        }
-        if let handler = eventHandlerRef {
-            RemoveEventHandler(handler)
-        }
-    }
+    // No deinit: the shared instance lives as long as the app, and the system
+    // releases its hotkeys and event handler when the process exits.
 }

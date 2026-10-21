@@ -1,6 +1,7 @@
 import AppKit
 
 /// Shows a brief HUD-style notification when the active layout changes.
+@MainActor
 enum LayoutNotification {
     private static var panel: NSPanel?
     private static var hideTimer: Timer?
@@ -57,13 +58,18 @@ enum LayoutNotification {
         p.orderFrontRegardless()
         p.alphaValue = 1.0
 
+        // Timer blocks and animation completions both run on the main thread.
         hideTimer = Timer.scheduledTimer(withTimeInterval: duration, repeats: false) { _ in
-            NSAnimationContext.runAnimationGroup { ctx in
-                ctx.duration = 0.3
-                p.animator().alphaValue = 0
-            } completionHandler: {
-                guard generation == shownGeneration else { return }
-                p.orderOut(nil)
+            MainActor.assumeIsolated {
+                NSAnimationContext.runAnimationGroup { ctx in
+                    ctx.duration = 0.3
+                    p.animator().alphaValue = 0
+                } completionHandler: {
+                    MainActor.assumeIsolated {
+                        guard generation == shownGeneration else { return }
+                        p.orderOut(nil)
+                    }
+                }
             }
         }
     }
