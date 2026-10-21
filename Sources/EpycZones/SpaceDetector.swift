@@ -30,6 +30,15 @@ extension NSScreen {
         let str = CFUUIDCreateString(nil, cfUUID.takeRetainedValue()) as String
         return str
     }
+
+    /// The connected screen with this display UUID or, for records saved
+    /// before 1.1 that have none, the connected screen with this name.
+    static func matching(displayUUID: String?, name: String) -> NSScreen? {
+        if let displayUUID {
+            return screens.first { $0.displayUUID() == displayUUID }
+        }
+        return screens.first { $0.localizedName == name }
+    }
 }
 
 // MARK: - Space Detector

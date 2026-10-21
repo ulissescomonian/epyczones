@@ -1,5 +1,6 @@
 import AppKit
 import ApplicationServices
+import OSLog
 
 /// Records which windows were snapped to which zones and restores them on launch.
 enum WindowPersistence {
@@ -9,7 +10,10 @@ enum WindowPersistence {
     struct Record: Codable, Equatable {
         let bundleID: String
         let windowTitle: String
+        /// Display name; the only display reference in records written before 1.1.
         let screenName: String
+        /// Display UUID; nil in records written before 1.1.
+        let displayUUID: String?
         let layoutID: UUID
         let zoneIndex: Int
     }
@@ -42,21 +46,19 @@ enum WindowPersistence {
     /// Record that a window was snapped to a zone.
     static func record(window: AXUIElement, zoneIndex: Int, screen: NSScreen, layoutID: UUID) {
         guard let bundleID = bundleID(of: window) else { return }
-        let title = windowTitle(of: window) ?? ""
-        let screenName = screen.localizedName
+        let title = WindowManager.title(of: window) ?? ""
 
         // Remove old record for this window
         records.removeAll { $0.bundleID == bundleID && $0.windowTitle == title }
 
-        // Add new record
-        let newRecord = Record(
+        records.append(Record(
             bundleID: bundleID,
             windowTitle: title,
-            screenName: screenName,
+            screenName: screen.localizedName,
+            displayUUID: screen.displayUUID(),
             layoutID: layoutID,
             zoneIndex: zoneIndex
-        )
-        records.append(newRecord)
+        ))
 
         // Cap size
         if records.count > maxRecords {
@@ -68,52 +70,37 @@ enum WindowPersistence {
 
     // MARK: - Restoring
 
-    /// Restore all visible windows to their last recorded zones.
+    /// Moves open windows back to their last recorded zones.
+    ///
+    /// Titles come from Accessibility, so this needs no Screen Recording
+    /// permission; CGWindowList titles do, and without them nothing was ever
+    /// restored. Matching follows `WindowMatcher`, so an untitled record never
+    /// moves an arbitrary window of its app.
     static func restoreAll() {
-        guard AccessibilityChecker.isGranted else { return }
-        guard !records.isEmpty else { return }
+        guard AccessibilityChecker.isGranted, !records.isEmpty else { return }
 
-        let store = LayoutStore.shared
+        let recordedApps = Set(records.map(\.bundleID))
+        let open = WindowManager.openAppWindows { recordedApps.contains($0) }
+        let matches = WindowMatcher.match(
+            saved: records.map { WindowMatcher.Window(bundleID: $0.bundleID, title: $0.windowTitle) },
+            open: open.map { WindowMatcher.Window(bundleID: $0.bundleID, title: WindowManager.title(of: $0.window) ?? "") }
+        )
 
-        guard let windowList = CGWindowListCopyWindowInfo(
-            [.optionOnScreenOnly, .excludeDesktopElements],
-            kCGNullWindowID
-        ) as? [[String: Any]] else { return }
+        var restored = 0
+        for (recordIndex, openIndex) in matches {
+            let record = records[recordIndex]
+            guard let screen = NSScreen.matching(displayUUID: record.displayUUID, name: record.screenName),
+                  let layout = LayoutStore.shared.layouts.first(where: { $0.id == record.layoutID }),
+                  layout.zones.indices.contains(record.zoneIndex) else { continue }
 
-        for windowInfo in windowList {
-            guard let layer = windowInfo[kCGWindowLayer as String] as? Int, layer == 0,
-                  let ownerPID = windowInfo[kCGWindowOwnerPID as String] as? pid_t,
-                  let windowName = windowInfo[kCGWindowName as String] as? String,
-                  let app = NSRunningApplication(processIdentifier: ownerPID),
-                  let bundleID = app.bundleIdentifier else { continue }
-
-            // Find matching record
-            guard let record = records.first(where: {
-                $0.bundleID == bundleID && ($0.windowTitle == windowName || $0.windowTitle.isEmpty)
-            }) else { continue }
-
-            // Find the target screen and layout
-            guard let screen = NSScreen.screens.first(where: { $0.localizedName == record.screenName }),
-                  let layout = store.layouts.first(where: { $0.id == record.layoutID }),
-                  record.zoneIndex < layout.zones.count else { continue }
-
-            // Get the AXUIElement for this window
-            let appElement = AXUIElementCreateApplication(ownerPID)
-            guard let window = findWindow(titled: windowName, in: appElement) else { continue }
-
-            // Snap to zone
-            let zone = layout.zones[record.zoneIndex]
-            let targetNS = zone.rect.frame(in: screen.visibleFrame)
-            let primaryHeight = NSScreen.screens[0].frame.height
-            var position = CGPoint(x: targetNS.origin.x, y: primaryHeight - targetNS.origin.y - targetNS.height)
-            if let val = AXValueCreate(.cgPoint, &position) {
-                AXUIElementSetAttributeValue(window, kAXPositionAttribute as CFString, val)
-            }
-            var size = CGSize(width: targetNS.width, height: targetNS.height)
-            if let val = AXValueCreate(.cgSize, &size) {
-                AXUIElementSetAttributeValue(window, kAXSizeAttribute as CFString, val)
-            }
+            let targetNS = layout.zones[record.zoneIndex].rect.frame(
+                in: screen.visibleFrame,
+                gap: AppSettings.shared.zoneGap
+            )
+            WindowManager.applyFrame(targetNS, to: open[openIndex].window, animated: false, raisesWindow: false)
+            restored += 1
         }
+        Log.app.notice("Restored \(restored) of \(open.count) open windows from \(records.count) records")
     }
 
     // MARK: - AX Helpers
@@ -122,29 +109,5 @@ enum WindowPersistence {
         var pid: pid_t = 0
         guard AXUIElementGetPid(window, &pid) == .success else { return nil }
         return NSRunningApplication(processIdentifier: pid)?.bundleIdentifier
-    }
-
-    private static func windowTitle(of window: AXUIElement) -> String? {
-        var value: AnyObject?
-        guard AXUIElementCopyAttributeValue(window, kAXTitleAttribute as CFString, &value) == .success else {
-            return nil
-        }
-        return value as? String
-    }
-
-    private static func findWindow(titled title: String, in app: AXUIElement) -> AXUIElement? {
-        var windowsRef: AnyObject?
-        guard AXUIElementCopyAttributeValue(app, kAXWindowsAttribute as CFString, &windowsRef) == .success,
-              let windows = windowsRef as? [AXUIElement] else { return nil }
-
-        for window in windows {
-            var titleRef: AnyObject?
-            if AXUIElementCopyAttributeValue(window, kAXTitleAttribute as CFString, &titleRef) == .success,
-               let windowTitle = titleRef as? String, windowTitle == title {
-                return window
-            }
-        }
-        // Fallback: return first window if no title match
-        return windows.first
     }
 }

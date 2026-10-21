@@ -27,6 +27,11 @@ final class AppSettings {
         }
     }
 
+    /// Move open windows back to their last recorded zones when EpycZones starts.
+    var restoreWindowsOnLaunch: Bool {
+        didSet { UserDefaults.standard.set(restoreWindowsOnLaunch, forKey: "restoreWindowsOnLaunch") }
+    }
+
     /// Enable edge snapping (drag near screen edge without modifier → halves/quarters).
     var edgeSnapEnabled: Bool {
         didSet { UserDefaults.standard.set(edgeSnapEnabled, forKey: "edgeSnapEnabled") }
@@ -68,6 +73,7 @@ final class AppSettings {
             "zoneGap": 0.0,
             "animateSnap": true,
             "launchAtLogin": false,
+            "restoreWindowsOnLaunch": true,
             "edgeSnapEnabled": true,
             "edgeSnapThreshold": 30.0,
             "edgeSnapDelay": 0.2,
@@ -77,6 +83,7 @@ final class AppSettings {
         self.zoneGap = defaults.double(forKey: "zoneGap")
         self.animateSnap = defaults.bool(forKey: "animateSnap")
         self.launchAtLogin = defaults.bool(forKey: "launchAtLogin")
+        self.restoreWindowsOnLaunch = defaults.bool(forKey: "restoreWindowsOnLaunch")
         self.edgeSnapEnabled = defaults.bool(forKey: "edgeSnapEnabled")
         self.edgeSnapThreshold = defaults.double(forKey: "edgeSnapThreshold")
         self.edgeSnapDelay = defaults.double(forKey: "edgeSnapDelay")

@@ -18,9 +18,28 @@ enum WorkspaceManager {
         struct Entry: Codable, Equatable {
             let bundleID: String
             let windowTitle: String
+            /// Display name; the only display reference in entries saved before 1.1.
             let screenName: String
+            /// Display UUID; nil in entries saved before 1.1.
+            let displayUUID: String?
             /// Relative position within screen's visible frame.
             let relativeFrame: RelativeRect
+        }
+    }
+
+    /// What a restore did, for the Settings window to report.
+    struct RestoreReport: Equatable {
+        let moved: Int
+        let total: Int
+        /// Names of apps with saved windows that were not found open.
+        let missingApps: [String]
+
+        var summary: String {
+            var text = "Moved \(moved) of \(total) windows."
+            if !missingApps.isEmpty {
+                text += " Not found: \(missingApps.joined(separator: ", "))."
+            }
+            return text
         }
     }
 
@@ -46,56 +65,21 @@ enum WorkspaceManager {
 
     // MARK: - Capture
 
-    /// Capture current window arrangement as a workspace.
+    /// Capture the standard windows of every visible app, EpycZones excluded.
+    /// Titles come from Accessibility and need no Screen Recording permission.
     static func captureCurrentWorkspace(name: String) -> Workspace {
         var entries: [Workspace.Entry] = []
 
-        guard let windowList = CGWindowListCopyWindowInfo(
-            [.optionOnScreenOnly, .excludeDesktopElements],
-            kCGNullWindowID
-        ) as? [[String: Any]] else { return Workspace(name: name, entries: []) }
-
-        let primaryHeight = NSScreen.screens[0].frame.height
-
-        for info in windowList {
-            guard let layer = info[kCGWindowLayer as String] as? Int, layer == 0,
-                  let pid = info[kCGWindowOwnerPID as String] as? pid_t,
-                  let app = NSRunningApplication(processIdentifier: pid),
-                  let bundleID = app.bundleIdentifier,
-                  let boundsDict = info[kCGWindowBounds as String] as? [String: CGFloat] else { continue }
-
-            let title = info[kCGWindowName as String] as? String ?? ""
-
-            // CG window bounds are in CG coords (top-left origin)
-            let cgRect = CGRect(
-                x: boundsDict["X"] ?? 0,
-                y: boundsDict["Y"] ?? 0,
-                width: boundsDict["Width"] ?? 0,
-                height: boundsDict["Height"] ?? 0
-            )
-
-            // Convert to NSScreen coords
-            let nsX = cgRect.origin.x
-            let nsY = primaryHeight - cgRect.origin.y - cgRect.height
-
-            // Find which screen this window is on
-            let centerNS = NSPoint(x: nsX + cgRect.width / 2, y: nsY + cgRect.height / 2)
-            guard let screen = NSScreen.screens.first(where: { $0.frame.contains(centerNS) }) else { continue }
-            let vf = screen.visibleFrame
-
-            // Convert to relative coords within visible frame
-            let relRect = RelativeRect(
-                x: (nsX - vf.origin.x) / vf.width,
-                y: 1.0 - (nsY - vf.origin.y + cgRect.height) / vf.height,
-                width: cgRect.width / vf.width,
-                height: cgRect.height / vf.height
-            )
+        for (window, bundleID) in WindowManager.openAppWindows() {
+            guard let frame = WindowManager.frame(of: window),
+                  let screen = WindowManager.screenForWindow(window) else { continue }
 
             entries.append(Workspace.Entry(
                 bundleID: bundleID,
-                windowTitle: title,
+                windowTitle: WindowManager.title(of: window) ?? "",
                 screenName: screen.localizedName,
-                relativeFrame: relRect
+                displayUUID: screen.displayUUID(),
+                relativeFrame: RelativeRect(frame: frame, in: screen.visibleFrame)
             ))
         }
 
@@ -104,47 +88,44 @@ enum WorkspaceManager {
 
     // MARK: - Restore
 
-    /// Restore a workspace by moving/resizing all matching windows.
-    static func restore(_ workspace: Workspace) {
-        guard AccessibilityChecker.isGranted else { return }
-        let primaryHeight = NSScreen.screens[0].frame.height
-
-        for entry in workspace.entries {
-            guard let screen = NSScreen.screens.first(where: { $0.localizedName == entry.screenName }) else { continue }
-            let vf = screen.visibleFrame
-            let targetNS = entry.relativeFrame.frame(in: vf)
-
-            // Find the running app and its window
-            let apps = NSWorkspace.shared.runningApplications.filter { $0.bundleIdentifier == entry.bundleID }
-            for app in apps {
-                let appElement = AXUIElementCreateApplication(app.processIdentifier)
-                var windowsRef: AnyObject?
-                guard AXUIElementCopyAttributeValue(appElement, kAXWindowsAttribute as CFString, &windowsRef) == .success,
-                      let windows = windowsRef as? [AXUIElement] else { continue }
-
-                for window in windows {
-                    var titleRef: AnyObject?
-                    let windowTitle: String
-                    if AXUIElementCopyAttributeValue(window, kAXTitleAttribute as CFString, &titleRef) == .success,
-                       let t = titleRef as? String {
-                        windowTitle = t
-                    } else {
-                        windowTitle = ""
-                    }
-
-                    if entry.windowTitle.isEmpty || windowTitle == entry.windowTitle || windowTitle.contains(entry.windowTitle) {
-                        var pos = CGPoint(x: targetNS.origin.x, y: primaryHeight - targetNS.origin.y - targetNS.height)
-                        if let val = AXValueCreate(.cgPoint, &pos) {
-                            AXUIElementSetAttributeValue(window, kAXPositionAttribute as CFString, val)
-                        }
-                        var size = CGSize(width: targetNS.width, height: targetNS.height)
-                        if let val = AXValueCreate(.cgSize, &size) {
-                            AXUIElementSetAttributeValue(window, kAXSizeAttribute as CFString, val)
-                        }
-                        break
-                    }
-                }
-            }
+    /// Moves each saved window that is open now back to its saved frame. Every
+    /// entry moves at most one window and every window at most once.
+    @discardableResult
+    static func restore(_ workspace: Workspace) -> RestoreReport {
+        guard AccessibilityChecker.isGranted else {
+            return RestoreReport(moved: 0, total: workspace.entries.count, missingApps: [])
         }
+
+        let savedApps = Set(workspace.entries.map(\.bundleID))
+        let open = WindowManager.openAppWindows { savedApps.contains($0) }
+        let matches = WindowMatcher.match(
+            saved: workspace.entries.map { WindowMatcher.Window(bundleID: $0.bundleID, title: $0.windowTitle) },
+            open: open.map { WindowMatcher.Window(bundleID: $0.bundleID, title: WindowManager.title(of: $0.window) ?? "") }
+        )
+
+        var moved = 0
+        for (entryIndex, openIndex) in matches.sorted(by: { $0.key < $1.key }) {
+            let entry = workspace.entries[entryIndex]
+            guard let screen = NSScreen.matching(displayUUID: entry.displayUUID, name: entry.screenName) else {
+                continue
+            }
+            let targetNS = entry.relativeFrame.frame(in: screen.visibleFrame)
+            WindowManager.applyFrame(targetNS, to: open[openIndex].window, animated: false, raisesWindow: false)
+            moved += 1
+        }
+
+        let missingBundleIDs = workspace.entries.indices
+            .filter { matches[$0] == nil }
+            .map { workspace.entries[$0].bundleID }
+        var seen = Set<String>()
+        let missingApps = missingBundleIDs.filter { seen.insert($0).inserted }.map(appName(for:))
+
+        return RestoreReport(moved: moved, total: workspace.entries.count, missingApps: missingApps)
+    }
+
+    private static func appName(for bundleID: String) -> String {
+        guard let url = NSWorkspace.shared.urlForApplication(withBundleIdentifier: bundleID) else { return bundleID }
+        return FileManager.default.displayName(atPath: url.path)
+            .replacingOccurrences(of: ".app", with: "")
     }
 }

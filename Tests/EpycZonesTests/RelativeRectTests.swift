@@ -40,6 +40,18 @@ final class RelativeRectTests: XCTestCase {
         XCTAssertEqual(rect.height, 0.5, accuracy: 1e-9)
     }
 
+    func testRelativeFrameIsTheInverseOfFrameIn() {
+        let window = CGRect(x: 350, y: 210, width: 420, height: 300)
+        let relative = RelativeRect(frame: window, in: screen)
+        let back = relative.frame(in: screen)
+        XCTAssertEqual(back.origin.x, window.origin.x, accuracy: 1e-9)
+        XCTAssertEqual(back.origin.y, window.origin.y, accuracy: 1e-9)
+        XCTAssertEqual(back.width, window.width, accuracy: 1e-9)
+        XCTAssertEqual(back.height, window.height, accuracy: 1e-9)
+        // Top-left origin: the window's top edge is 340 pt below the screen's top.
+        XCTAssertEqual(relative.y, 340.0 / 800.0, accuracy: 1e-9)
+    }
+
     func testBoundingCoversEveryZone() {
         let grid = Layout.grid2x2().zones
         XCTAssertEqual(RelativeRect.bounding(grid), RelativeRect.full)

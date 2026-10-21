@@ -6,6 +6,8 @@ struct SettingsView: View {
     @State private var settings = AppSettings.shared
     @State private var workspaces = WorkspaceManager.loadAll()
     @State private var newWorkspaceName = ""
+    /// Result of the last workspace restore.
+    @State private var workspaceReport: String?
     @State private var recorder = HotKeyRecorder()
     @State private var ruleStore = AppRuleStore.shared
     @State private var newRuleAppID = ""
@@ -35,6 +37,7 @@ struct SettingsView: View {
     private var generalTab: some View {
         Form {
             Toggle("Launch at Login", isOn: $settings.launchAtLogin)
+            Toggle("Restore windows to their zones at launch", isOn: $settings.restoreWindowsOnLaunch)
             Toggle("Animate window snapping", isOn: $settings.animateSnap)
 
             Section("Overlay Theme") {
@@ -266,7 +269,7 @@ struct SettingsView: View {
                                 .foregroundStyle(.secondary)
                                 .font(.caption)
                             Button("Restore") {
-                                WorkspaceManager.restore(ws)
+                                workspaceReport = WorkspaceManager.restore(ws).summary
                             }
                             .buttonStyle(.bordered)
                             Button(role: .destructive) {
@@ -278,6 +281,12 @@ struct SettingsView: View {
                             .buttonStyle(.bordered)
                         }
                     }
+                }
+
+                if let workspaceReport {
+                    Text(workspaceReport)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
                 }
             }
 

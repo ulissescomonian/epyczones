@@ -70,8 +70,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         AppRuleMonitor.shared.start()
 
         // Restore windows to their last recorded zones (delayed to let apps finish launching)
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
-            WindowPersistence.restoreAll()
+        if AppSettings.shared.restoreWindowsOnLaunch {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                WindowPersistence.restoreAll()
+            }
         }
     }
 

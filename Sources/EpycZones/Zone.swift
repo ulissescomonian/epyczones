@@ -10,6 +10,24 @@ struct RelativeRect: Codable, Equatable {
     static let zero = RelativeRect(x: 0, y: 0, width: 0, height: 0)
     static let full = RelativeRect(x: 0, y: 0, width: 1, height: 1)
 
+    init(x: Double, y: Double, width: Double, height: Double) {
+        self.x = x
+        self.y = y
+        self.width = width
+        self.height = height
+    }
+
+    /// The inverse of `frame(in:)`: expresses an absolute frame (NSScreen
+    /// coordinates, bottom-left origin) relative to `screenRect`.
+    init(frame: CGRect, in screenRect: CGRect) {
+        self.init(
+            x: (frame.minX - screenRect.minX) / screenRect.width,
+            y: 1.0 - (frame.maxY - screenRect.minY) / screenRect.height,
+            width: frame.width / screenRect.width,
+            height: frame.height / screenRect.height
+        )
+    }
+
     /// Convert to an absolute frame within a screen rect (NSScreen coordinates, bottom-left origin).
     /// Since RelativeRect uses top-left origin (y=0 is top), we flip Y for NSScreen.
     /// `gap` adds inset padding in points on each side.

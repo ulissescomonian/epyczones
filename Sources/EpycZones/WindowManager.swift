@@ -894,7 +894,14 @@ enum WindowManager {
 
     // MARK: - Apply
 
-    static func applyFrame(_ targetNS: CGRect, to window: AXUIElement, animated: Bool = true) {
+    /// - Parameter raisesWindow: Bring the window to the front of its app
+    ///   afterwards. Batch restores pass false to keep the existing stacking.
+    static func applyFrame(
+        _ targetNS: CGRect,
+        to window: AXUIElement,
+        animated: Bool = true,
+        raisesWindow: Bool = true
+    ) {
         let primaryHeight = NSScreen.screens[0].frame.height
         let targetPos = CGPoint(x: targetNS.origin.x, y: primaryHeight - targetNS.origin.y - targetNS.height)
 
@@ -911,7 +918,7 @@ enum WindowManager {
                 if hadEnhancedUI {
                     setEnhancedUI(appElement, enabled: true)
                 }
-                raise(window)
+                if raisesWindow { raise(window) }
             }
         } else {
             // Rectangle's approach: SIZE → POSITION → SIZE.
@@ -925,8 +932,56 @@ enum WindowManager {
             if hadEnhancedUI {
                 setEnhancedUI(appElement, enabled: true)
             }
-            raise(window)
+            if raisesWindow { raise(window) }
         }
+    }
+
+    // MARK: - Window Enumeration
+
+    /// Standard, visible windows of a running app that can be moved and
+    /// resized, in the app's AX order (front to back).
+    static func usableWindows(ofProcess pid: pid_t) -> [AXUIElement] {
+        var value: AnyObject?
+        let app = AXUIElementCreateApplication(pid)
+        guard AXUIElementCopyAttributeValue(app, kAXWindowsAttribute as CFString, &value) == .success,
+              let rawWindows = value as? [AnyObject] else { return [] }
+
+        return rawWindows.compactMap { axElement(from: $0) }.filter { window in
+            var subrole: AnyObject?
+            AXUIElementCopyAttributeValue(window, kAXSubroleAttribute as CFString, &subrole)
+            return (subrole as? String) == (kAXStandardWindowSubrole as String) && isUsableWindow(window)
+        }
+    }
+
+    /// Usable windows of every regular, visible app except EpycZones itself,
+    /// optionally limited to some bundle identifiers.
+    static func openAppWindows(
+        includingBundleID include: (String) -> Bool = { _ in true }
+    ) -> [(window: AXUIElement, bundleID: String)] {
+        var result: [(window: AXUIElement, bundleID: String)] = []
+        for app in NSWorkspace.shared.runningApplications
+        where app.activationPolicy == .regular && !app.isHidden && app.processIdentifier != getpid() {
+            guard let bundleID = app.bundleIdentifier, include(bundleID) else { continue }
+            for window in usableWindows(ofProcess: app.processIdentifier) {
+                result.append((window, bundleID))
+            }
+        }
+        return result
+    }
+
+    /// The window's title as Accessibility reports it. Unlike CGWindowList
+    /// titles, this needs no Screen Recording permission.
+    static func title(of window: AXUIElement) -> String? {
+        var value: AnyObject?
+        guard AXUIElementCopyAttributeValue(window, kAXTitleAttribute as CFString, &value) == .success else {
+            return nil
+        }
+        return value as? String
+    }
+
+    /// The window's frame in NSScreen coordinates (bottom-left origin).
+    static func frame(of window: AXUIElement) -> CGRect? {
+        currentNSFrame(of: window)
     }
 
     // MARK: - Enhanced UI Helpers
