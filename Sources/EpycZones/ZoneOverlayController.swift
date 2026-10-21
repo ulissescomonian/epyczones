@@ -183,23 +183,12 @@ final class ZoneOverlayNSView: NSView {
             }
             guard !highlightedZones.isEmpty else { return }
 
-            // Compute combined bounding rect
-            var minX = highlightedZones[0].rect.x
-            var minY = highlightedZones[0].rect.y
-            var maxX = minX + highlightedZones[0].rect.width
-            var maxY = minY + highlightedZones[0].rect.height
-            for z in highlightedZones.dropFirst() {
-                minX = min(minX, z.rect.x)
-                minY = min(minY, z.rect.y)
-                maxX = max(maxX, z.rect.x + z.rect.width)
-                maxY = max(maxY, z.rect.y + z.rect.height)
-            }
-
+            let combined = RelativeRect.bounding(highlightedZones)
             let ghostRect = NSRect(
-                x: vfLocal.origin.x + minX * vfLocal.width + gap + 4,
-                y: vfLocal.origin.y + (1.0 - minY - (maxY - minY)) * vfLocal.height + gap + 4,
-                width: (maxX - minX) * vfLocal.width - gap * 2 - 8,
-                height: (maxY - minY) * vfLocal.height - gap * 2 - 8
+                x: vfLocal.origin.x + combined.x * vfLocal.width + gap + 4,
+                y: vfLocal.origin.y + (1.0 - combined.y - combined.height) * vfLocal.height + gap + 4,
+                width: combined.width * vfLocal.width - gap * 2 - 8,
+                height: combined.height * vfLocal.height - gap * 2 - 8
             )
 
             // Ghost window fill

@@ -6,6 +6,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)
 
+        // Bound every AX request before anything talks to other apps
+        AccessibilityChecker.configureMessagingTimeout()
+
         // Load window persistence data
         WindowPersistence.load()
 

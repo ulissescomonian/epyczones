@@ -13,6 +13,11 @@ let package = Package(
                 .linkedFramework("AppKit"),
                 .linkedFramework("ApplicationServices"),
             ]
-        )
+        ),
+        .testTarget(
+            name: "EpycZonesTests",
+            dependencies: ["EpycZones"],
+            path: "Tests/EpycZonesTests"
+        ),
     ]
 )

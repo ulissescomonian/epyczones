@@ -1,5 +1,6 @@
 import Carbon
 import Foundation
+import OSLog
 
 // Carbon hotkey callback — must be a non-capturing function usable as a C function pointer.
 private func carbonHotKeyCallback(
@@ -145,16 +146,15 @@ final class HotKeyManager {
 
         if status == noErr, let ref = ref {
             hotKeyRefs.append(ref)
-            NSLog("[EpycZones] Registered hotkey id=%d keyCode=%d mods=%d", id, keyCode, modifiers)
+            Log.hotKeys.debug("Registered hotkey id=\(id) keyCode=\(keyCode) mods=\(modifiers)")
         } else {
-            NSLog("[EpycZones] FAILED to register hotkey: keyCode=%d, mods=%d, status=%d", keyCode, modifiers, status)
+            Log.hotKeys.error("Failed to register hotkey keyCode=\(keyCode) mods=\(modifiers) status=\(status)")
         }
     }
 
     // MARK: - Callback
 
     func handleHotKey(id: UInt32) {
-        NSLog("[EpycZones] HotKey FIRED id=%d", id)
         handlers[id]?()
     }
 

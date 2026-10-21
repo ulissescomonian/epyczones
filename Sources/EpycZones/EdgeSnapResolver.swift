@@ -16,8 +16,23 @@ enum EdgeSnapResolver {
             $0.frame.insetBy(dx: -1, dy: -1).contains(point)
         }) else { return nil }
 
-        let f = screen.frame
-        let threshold = AppSettings.shared.edgeSnapThreshold
+        guard let position = position(
+            at: point,
+            in: screen.frame,
+            threshold: AppSettings.shared.edgeSnapThreshold,
+            topEdgeMaximizes: AppSettings.shared.edgeSnapTopMaximize
+        ) else { return nil }
+        return Target(position: position, screen: screen)
+    }
+
+    /// Classifies a point against one screen frame (NSScreen coordinates,
+    /// bottom-left origin) without consulting global state.
+    static func position(
+        at point: NSPoint,
+        in f: CGRect,
+        threshold: Double,
+        topEdgeMaximizes: Bool
+    ) -> SnapPosition? {
         let nearLeft   = point.x <= f.minX + threshold
         let nearRight  = point.x >= f.maxX - threshold
         let nearTop    = point.y >= f.maxY - threshold
@@ -31,17 +46,15 @@ enum EdgeSnapResolver {
         let inLeftBand   = point.x <= f.minX + corner
         let inRightBand  = point.x >= f.maxX - corner
 
-        let position: SnapPosition
         if nearLeft {
-            position = inTopBand ? .topLeftQuarter : inBottomBand ? .bottomLeftQuarter : .leftHalf
+            return inTopBand ? .topLeftQuarter : inBottomBand ? .bottomLeftQuarter : .leftHalf
         } else if nearRight {
-            position = inTopBand ? .topRightQuarter : inBottomBand ? .bottomRightQuarter : .rightHalf
+            return inTopBand ? .topRightQuarter : inBottomBand ? .bottomRightQuarter : .rightHalf
         } else if nearTop {
-            let topCenter: SnapPosition = AppSettings.shared.edgeSnapTopMaximize ? .maximize : .topHalf
-            position = inLeftBand ? .topLeftQuarter : inRightBand ? .topRightQuarter : topCenter
+            let topCenter: SnapPosition = topEdgeMaximizes ? .maximize : .topHalf
+            return inLeftBand ? .topLeftQuarter : inRightBand ? .topRightQuarter : topCenter
         } else {
-            position = inLeftBand ? .bottomLeftQuarter : inRightBand ? .bottomRightQuarter : .bottomHalf
+            return inLeftBand ? .bottomLeftQuarter : inRightBand ? .bottomRightQuarter : .bottomHalf
         }
-        return Target(position: position, screen: screen)
     }
 }

@@ -32,6 +32,22 @@ struct RelativeRect: Codable, Equatable {
         height = Swift.max(0.05, Swift.min(height, 1 - y))
     }
 
+    /// Smallest rect that contains every zone; `.zero` when there are none.
+    static func bounding(_ zones: [Zone]) -> RelativeRect {
+        guard let first = zones.first else { return .zero }
+        var minX = first.rect.x
+        var minY = first.rect.y
+        var maxX = first.rect.x + first.rect.width
+        var maxY = first.rect.y + first.rect.height
+        for zone in zones.dropFirst() {
+            minX = Swift.min(minX, zone.rect.x)
+            minY = Swift.min(minY, zone.rect.y)
+            maxX = Swift.max(maxX, zone.rect.x + zone.rect.width)
+            maxY = Swift.max(maxY, zone.rect.y + zone.rect.height)
+        }
+        return RelativeRect(x: minX, y: minY, width: maxX - minX, height: maxY - minY)
+    }
+
     /// Snap values to a grid with the given number of divisions.
     mutating func snapToGrid(divisions: Int = 12) {
         let step = 1.0 / Double(divisions)

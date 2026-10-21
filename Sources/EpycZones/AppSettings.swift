@@ -1,6 +1,7 @@
 import AppKit
 import Foundation
 import Observation
+import OSLog
 import ServiceManagement
 
 /// Global app settings, persisted to UserDefaults.
@@ -110,7 +111,7 @@ final class AppSettings {
                     try SMAppService.mainApp.unregister()
                 }
             } catch {
-                NSLog("[EpycZones] Login item error: %@", error.localizedDescription)
+                Log.app.error("Login item error: \(error.localizedDescription, privacy: .public)")
             }
         }
     }

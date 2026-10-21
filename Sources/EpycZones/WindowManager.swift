@@ -1,5 +1,6 @@
 import AppKit
 import ApplicationServices
+import OSLog
 
 enum WindowManager {
 
@@ -692,7 +693,7 @@ enum WindowManager {
     /// A constrained window may not reach the requested size exactly. It is a
     /// successful snap when every requested component is either within the
     /// normal tolerance or has measurably moved toward its requested value.
-    private static func frameReachedOrAdvanced(from before: CGRect, to after: CGRect, toward target: CGRect) -> Bool {
+    static func frameReachedOrAdvanced(from before: CGRect, to after: CGRect, toward target: CGRect) -> Bool {
         let tolerance: CGFloat = 2
         let values: [(CGFloat, CGFloat, CGFloat)] = [
             (before.origin.x, after.origin.x, target.origin.x),
@@ -1279,7 +1280,8 @@ enum WindowManager {
         let now = Date.timeIntervalSinceReferenceDate
         if let last = lastAXLogTimes[key], now - last < interval { return }
         lastAXLogTimes[key] = now
-        NSLog("[EpycZones] %@", message)
+        // Messages carry operations, PIDs, bundle IDs and AX error codes only.
+        Log.accessibility.notice("\(message, privacy: .public)")
     }
 
     static func screenForWindow(_ window: AXUIElement) -> NSScreen? {

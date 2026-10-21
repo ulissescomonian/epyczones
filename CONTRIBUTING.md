@@ -36,11 +36,13 @@ Repository-specific instructions for coding agents live in `AGENTS.md`.
 
 ## Validation
 
-There is not yet an automated Swift test target. Before opening a pull request,
-run the deterministic build and packaging checks relevant to the change:
+Unit tests in `Tests/EpycZonesTests/` cover snap geometry, zone hit-testing,
+edge resolution, and layout precedence. Before opening a pull request, run the
+tests and the deterministic build and packaging checks relevant to the change:
 
 ```bash
 make debug
+make test
 make bundle
 make dmg
 ```

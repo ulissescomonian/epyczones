@@ -1,5 +1,6 @@
 import AppKit
 import ApplicationServices
+import OSLog
 
 /// Animates window snapping with smooth interpolation.
 /// All AX calls are dispatched to the main thread (required by macOS Tahoe).
@@ -92,7 +93,7 @@ enum WindowAnimator {
 
     private static func finish(succeeded: Bool, completion: ((Bool) -> Void)?) {
         if !succeeded {
-            NSLog("[EpycZones] Window animation AX write failed")
+            Log.accessibility.notice("Window animation AX write failed")
         }
         completion?(succeeded)
     }

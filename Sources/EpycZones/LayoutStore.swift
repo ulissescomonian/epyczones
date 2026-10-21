@@ -22,19 +22,40 @@ final class LayoutStore {
 
     /// Active layout for a specific screen. Priority: per-space → per-screen → global default.
     func activeLayout(for screen: NSScreen) -> Layout? {
+        Self.resolveLayout(
+            spaceUUID: SpaceDetector.shared.currentSpaceUUID(for: screen),
+            screenName: screen.localizedName,
+            layouts: layouts,
+            spaceLayouts: spaceLayouts,
+            screenLayouts: screenLayouts,
+            defaultLayoutID: activeLayoutID
+        )
+    }
+
+    /// Pure precedence rule behind `activeLayout(for:)`: per-space → per-screen
+    /// → global default. An assignment whose layout no longer exists falls
+    /// through to the next level.
+    static func resolveLayout(
+        spaceUUID: String?,
+        screenName: String,
+        layouts: [Layout],
+        spaceLayouts: [String: UUID],
+        screenLayouts: [String: UUID],
+        defaultLayoutID: UUID?
+    ) -> Layout? {
         // 1. Check per-space assignment
-        if let spaceUUID = SpaceDetector.shared.currentSpaceUUID(for: screen),
+        if let spaceUUID,
            let id = spaceLayouts[spaceUUID],
            let layout = layouts.first(where: { $0.id == id }) {
             return layout
         }
         // 2. Check per-screen assignment
-        if let id = screenLayouts[screen.localizedName],
+        if let id = screenLayouts[screenName],
            let layout = layouts.first(where: { $0.id == id }) {
             return layout
         }
         // 3. Global default
-        return activeLayout
+        return layouts.first { $0.id == defaultLayoutID }
     }
 
     private init() {

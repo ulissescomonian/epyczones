@@ -280,8 +280,8 @@ data and include them deliberately when making backups.
 - Some apps enforce minimum sizes, use non-standard windows, or refuse
   Accessibility frame changes.
 - Undo/Restore is in memory and limited to recent frames; redo is not exposed.
-- EpycZones has no automatic updater and currently has no automated Swift test
-  target.
+- EpycZones has no automatic updater. Unit tests cover geometry and layout
+  selection; window movement through Accessibility is validated manually.
 
 ## Build and package from source
 

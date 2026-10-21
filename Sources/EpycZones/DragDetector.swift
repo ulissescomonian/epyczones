@@ -1,5 +1,6 @@
 import Cocoa
 import ApplicationServices
+import OSLog
 
 /// Detects window dragging + Shift key to show zone overlays,
 /// and dragging near screen edges to snap to halves/quarters (ghost preview).
@@ -205,7 +206,7 @@ final class DragDetector {
                     }
                 } else if !validIndices.isEmpty {
                     let zones = validIndices.map { layout.zones[$0] }
-                    let targetNS = combinedRect(of: zones).frame(
+                    let targetNS = RelativeRect.bounding(zones).frame(
                         in: screen.visibleFrame,
                         gap: AppSettings.shared.zoneGap
                     )
@@ -219,7 +220,7 @@ final class DragDetector {
                     ) { _, _ in }
                 }
             } else if draggedWindow == nil {
-                NSLog("[EpycZones] Could not capture dragged window for zone snap")
+                Log.drag.notice("Could not capture dragged window for zone snap")
             }
         } else if let target = snapPreview.target {
             snapPreview.hide()
@@ -307,25 +308,9 @@ final class DragDetector {
     /// Snap window to combined bounding rect of one or more zones (spanning).
     private func snapWindow(_ window: AXUIElement, toZones zones: [Zone], on screen: NSScreen) {
         let gap = AppSettings.shared.zoneGap
-        let combined = combinedRect(of: zones)
+        let combined = RelativeRect.bounding(zones)
         let targetNS = combined.frame(in: screen.visibleFrame, gap: gap)
         WindowManager.applySnap(targetNS, to: window, animated: false)
-    }
-
-    /// Compute bounding RelativeRect that encompasses all given zones.
-    private func combinedRect(of zones: [Zone]) -> RelativeRect {
-        guard let first = zones.first else { return .zero }
-        var minX = first.rect.x
-        var minY = first.rect.y
-        var maxX = first.rect.x + first.rect.width
-        var maxY = first.rect.y + first.rect.height
-        for zone in zones.dropFirst() {
-            minX = min(minX, zone.rect.x)
-            minY = min(minY, zone.rect.y)
-            maxX = max(maxX, zone.rect.x + zone.rect.width)
-            maxY = max(maxY, zone.rect.y + zone.rect.height)
-        }
-        return RelativeRect(x: minX, y: minY, width: maxX - minX, height: maxY - minY)
     }
 
     // MARK: - Window Movement Detection
@@ -381,7 +366,7 @@ final class DragDetector {
     /// Apply an edge snap after drop using the same guarded AX sequence as zone snaps.
     private func applyEdgeSnap(_ target: EdgeSnapResolver.Target) {
         guard let w = draggedWindow else {
-            NSLog("[EpycZones] Could not capture dragged window for edge snap")
+            Log.drag.notice("Could not capture dragged window for edge snap")
             return
         }
         let vf = target.screen.visibleFrame
@@ -405,88 +390,15 @@ final class DragDetector {
               let layout = LayoutStore.shared.activeLayout(for: screen) else { return ([], nil) }
 
         let vf = screen.visibleFrame
-        let relX = (nsPoint.x - vf.origin.x) / vf.width
-        let relY = 1.0 - (nsPoint.y - vf.origin.y) / vf.height
+        let relative = CGPoint(
+            x: (nsPoint.x - vf.origin.x) / vf.width,
+            y: 1.0 - (nsPoint.y - vf.origin.y) / vf.height
+        )
 
         // Zone boundary threshold in relative coords (~20px)
         let threshold = 20.0 / max(vf.width, vf.height)
 
-        // First, find exact zone hit
-        var exactHit: Int?
-        for (index, zone) in layout.zones.enumerated() {
-            let r = zone.rect
-            if relX >= r.x && relX < r.x + r.width && relY >= r.y && relY < r.y + r.height {
-                exactHit = index
-                break
-            }
-        }
-
-        guard let primary = exactHit else { return ([], screen) }
-
-        // Find all adjacent zones that share a border with the primary zone near the cursor.
-        // This allows selecting 2 zones (edge), 3 zones (T-junction), or all 4 (center of grid).
-        var result: Set<Int> = [primary]
-        let pz = layout.zones[primary].rect
-
-        // Is cursor near each edge of the primary zone?
-        let nearRight  = abs(relX - (pz.x + pz.width))  < threshold
-        let nearLeft   = abs(relX - pz.x)               < threshold
-        let nearBottom = abs(relY - (pz.y + pz.height)) < threshold
-        let nearTop    = abs(relY - pz.y)               < threshold
-
-        guard nearRight || nearLeft || nearBottom || nearTop else {
-            return (result, screen)
-        }
-
-        for (index, zone) in layout.zones.enumerated() where index != primary {
-            let r = zone.rect
-
-            // Check vertical shared edge (left/right) — zones must overlap on Y axis
-            let yOverlap = max(0, min(pz.y + pz.height, r.y + r.height) - max(pz.y, r.y))
-            // Check horizontal shared edge (top/bottom) — zones must overlap on X axis
-            let xOverlap = max(0, min(pz.x + pz.width, r.x + r.width) - max(pz.x, r.x))
-
-            let isAdjacent =
-                // Right edge: cursor near right of primary & zone starts there
-                (nearRight  && yOverlap > 0.01 && abs(r.x - (pz.x + pz.width)) < threshold) ||
-                // Left edge: cursor near left of primary & zone ends there
-                (nearLeft   && yOverlap > 0.01 && abs((r.x + r.width) - pz.x) < threshold) ||
-                // Bottom edge: cursor near bottom of primary & zone starts there
-                (nearBottom && xOverlap > 0.01 && abs(r.y - (pz.y + pz.height)) < threshold) ||
-                // Top edge: cursor near top of primary & zone ends there
-                (nearTop    && xOverlap > 0.01 && abs((r.y + r.height) - pz.y) < threshold)
-
-            if isAdjacent {
-                result.insert(index)
-            }
-        }
-
-        // If we found adjacent zones, also check if THEIR neighbors should be included.
-        // E.g., in a 2x2 grid at the center: primary=topLeft finds right+bottom adjacent,
-        // but the diagonal (bottomRight) is adjacent to both of those, not directly to primary.
-        if result.count > 1 {
-            let directAdjacent = result.subtracting([primary])
-            for adjIdx in directAdjacent {
-                let az = layout.zones[adjIdx].rect
-                for (index, zone) in layout.zones.enumerated() where !result.contains(index) {
-                    let r = zone.rect
-                    // Check if this zone shares a border with the adjacent zone near the cursor
-                    let yOvr = max(0, min(az.y + az.height, r.y + r.height) - max(az.y, r.y))
-                    let xOvr = max(0, min(az.x + az.width, r.x + r.width) - max(az.x, r.x))
-
-                    let isDiagonal =
-                        (nearRight  && yOvr > 0.01 && abs(r.x - (az.x + az.width)) < threshold) ||
-                        (nearLeft   && yOvr > 0.01 && abs((r.x + r.width) - az.x) < threshold) ||
-                        (nearBottom && xOvr > 0.01 && abs(r.y - (az.y + az.height)) < threshold) ||
-                        (nearTop    && xOvr > 0.01 && abs((r.y + r.height) - az.y) < threshold)
-
-                    if isDiagonal {
-                        result.insert(index)
-                    }
-                }
-            }
-        }
-
-        return (result, screen)
+        let indices = ZoneHitTester.zoneIndices(at: relative, in: layout.zones, threshold: threshold)
+        return (indices, screen)
     }
 }
