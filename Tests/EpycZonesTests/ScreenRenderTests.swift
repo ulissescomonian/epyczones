@@ -6,8 +6,9 @@ import XCTest
 @testable import EpycZones
 
 /// Renders app screens to PNG for design review, in light and dark mode at
-/// 2x. Runs only when EPYCZONES_SCREENS names an output folder; see
-/// `make screens`. Uses in-memory sample data, never the user's files.
+/// the backing scale of their display. Runs only when EPYCZONES_SCREENS
+/// names an output folder; see `make screens`. Uses in-memory sample data,
+/// never the user's files.
 @MainActor
 final class ScreenRenderTests: XCTestCase {
     private var outputDirectory: URL?
@@ -374,9 +375,13 @@ enum RenderLocalization {
 }
 
 private extension Bundle {
-    /// After the exchange, `Bundle.main` runs this, and this name runs the original.
+    /// After the exchange, `Bundle.main` runs this, and this name runs the
+    /// original. The original is reached through the runtime, so the getter
+    /// never reads itself.
     @objc class var renderMain: Bundle {
-        RenderLocalization.bundle ?? renderMain
+        if let bundle = RenderLocalization.bundle { return bundle }
+        let original = (self as AnyObject).perform(NSSelectorFromString("renderMain"))
+        return original?.takeUnretainedValue() as? Bundle ?? Bundle(for: ScreenRenderTests.self)
     }
 }
 
