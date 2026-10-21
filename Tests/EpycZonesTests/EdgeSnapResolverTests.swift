@@ -70,7 +70,8 @@ final class EdgeSnapResolverTests: XCTestCase {
     func testOnlyTheStretchANeighborCoversIsShared() {
         let shortNeighbor = CGRect(x: 1000, y: 300, width: 400, height: 300)
         XCTAssertNil(position(995, 400, neighbors: [shortNeighbor]))
-        XCTAssertEqual(position(995, 700, neighbors: [shortNeighbor]), .rightHalf)
+        // Below the neighbor and outside the 120 pt corner bands.
+        XCTAssertEqual(position(995, 200, neighbors: [shortNeighbor]), .rightHalf)
     }
 
     func testFrameOffsetIsRespected() {
