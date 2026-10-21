@@ -46,12 +46,7 @@ enum WorkspaceManager {
 
     // MARK: - Persistence
 
-    private static var fileURL: URL {
-        let dir = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
-            .appendingPathComponent("EpycZones", isDirectory: true)
-        try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
-        return dir.appendingPathComponent("workspaces.json")
-    }
+    private static let fileURL = AppPaths.file("workspaces.json")
 
     static func loadAll() -> [Workspace] {
         guard let data = try? Data(contentsOf: fileURL),

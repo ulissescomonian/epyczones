@@ -34,19 +34,23 @@ struct AppRule: Identifiable, Codable, Equatable {
 @Observable
 @MainActor
 final class AppRuleStore {
-    static let shared = AppRuleStore()
+    static let shared = AppRuleStore(fileURL: AppPaths.file("app-rules.json"))
 
     private(set) var rules: [AppRule] = []
 
-    private var fileURL: URL {
-        let dir = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
-            .appendingPathComponent("EpycZones", isDirectory: true)
-        try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
-        return dir.appendingPathComponent("app-rules.json")
+    /// Where rules persist; nil keeps them in memory, for screen renders.
+    private let fileURL: URL?
+
+    init(fileURL: URL?) {
+        self.fileURL = fileURL
+        load()
     }
 
-    private init() {
-        load()
+    /// A store that never touches disk, filled with the given rules.
+    static func inMemory(rules: [AppRule]) -> AppRuleStore {
+        let store = AppRuleStore(fileURL: nil)
+        store.rules = rules
+        return store
     }
 
     func add(_ rule: AppRule) {
@@ -68,14 +72,15 @@ final class AppRuleStore {
     }
 
     private func save() {
+        guard let fileURL else { return }
         let encoder = JSONEncoder()
         encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
         guard let data = try? encoder.encode(rules) else { return }
-        try? data.write(to: fileURL)
+        try? data.write(to: fileURL, options: .atomic)
     }
 
     private func load() {
-        guard let data = try? Data(contentsOf: fileURL),
+        guard let fileURL, let data = try? Data(contentsOf: fileURL),
               let decoded = try? JSONDecoder().decode([AppRule].self, from: data) else { return }
         rules = decoded
     }

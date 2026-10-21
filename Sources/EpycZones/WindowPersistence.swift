@@ -24,12 +24,7 @@ enum WindowPersistence {
 
     // MARK: - Persistence
 
-    private static var fileURL: URL {
-        let dir = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
-            .appendingPathComponent("EpycZones", isDirectory: true)
-        try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
-        return dir.appendingPathComponent("window-zones.json")
-    }
+    private static let fileURL = AppPaths.file("window-zones.json")
 
     static func save() {
         guard let data = try? JSONEncoder().encode(records) else { return }

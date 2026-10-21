@@ -5,7 +5,7 @@ import Observation
 @Observable
 @MainActor
 final class LayoutStore {
-    static let shared = LayoutStore()
+    static let shared = LayoutStore(fileURL: AppPaths.file("layouts.json"))
 
     var layouts: [Layout] = []
     var activeLayoutID: UUID?
@@ -71,21 +71,34 @@ final class LayoutStore {
         return layout(defaultLayoutID)
     }
 
-    private init() {
+    /// Where layouts persist; nil keeps them in memory, for screen renders.
+    private let fileURL: URL?
+
+    init(fileURL: URL?) {
+        self.fileURL = fileURL
         load()
         migrateLegacyAssignments()
     }
 
-    // MARK: - Persistence
-
-    private var fileURL: URL {
-        let dir = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
-            .appendingPathComponent("EpycZones", isDirectory: true)
-        try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
-        return dir.appendingPathComponent("layouts.json")
+    /// A store that never touches disk, filled with the given state.
+    static func inMemory(
+        layouts: [Layout],
+        defaultLayoutID: UUID?,
+        displayLayouts: [String: UUID] = [:],
+        spaceLayouts: [String: UUID] = [:]
+    ) -> LayoutStore {
+        let store = LayoutStore(fileURL: nil)
+        store.layouts = layouts
+        store.activeLayoutID = defaultLayoutID
+        store.displayLayouts = displayLayouts
+        store.spaceLayouts = spaceLayouts
+        return store
     }
 
+    // MARK: - Persistence
+
     func save() {
+        guard let fileURL else { return }
         let model = StorageModel(
             layouts: layouts,
             activeLayoutID: activeLayoutID,
@@ -98,7 +111,7 @@ final class LayoutStore {
     }
 
     func load() {
-        guard let data = try? Data(contentsOf: fileURL),
+        guard let fileURL, let data = try? Data(contentsOf: fileURL),
               let model = try? JSONDecoder().decode(StorageModel.self, from: data) else { return }
         layouts = model.layouts
         activeLayoutID = model.activeLayoutID
