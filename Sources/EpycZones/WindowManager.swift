@@ -33,10 +33,10 @@ enum WindowManager {
             restoreWindow(window)
             return
         case .makeSmaller:
-            resizeWindow(window, factor: 0.9)
+            resizeWindow(window, screen: screen, factor: 0.9)
             return
         case .makeLarger:
-            resizeWindow(window, factor: 1.1)
+            resizeWindow(window, screen: screen, factor: 1.1)
             return
         case .maximizeHeight:
             maximizeHeight(window, screen: screen)
@@ -148,15 +148,20 @@ enum WindowManager {
         applyFrame(previous, to: window)
     }
 
-    private static func resizeWindow(_ window: AXUIElement, factor: Double) {
+    private static func resizeWindow(_ window: AXUIElement, screen: NSScreen, factor: Double) {
         guard let frame = AXWindow.frame(of: window) else { return }
         SnapHistory.saveFrame(of: window)
+        applyFrame(scaled(frame, by: factor, within: screen.visibleFrame), to: window)
+    }
 
-        // Keep centered
-        let newW = frame.width * factor
-        let newH = frame.height * factor
-        let targetNS = CGRect(x: frame.midX - newW / 2, y: frame.midY - newH / 2, width: newW, height: newH)
-        applyFrame(targetNS, to: window)
+    /// Scales a frame about its center and keeps it inside `bounds`, so
+    /// growing a window never pushes it past the visible area of its display.
+    nonisolated static func scaled(_ frame: CGRect, by factor: Double, within bounds: CGRect) -> CGRect {
+        let width = min(frame.width * factor, bounds.width)
+        let height = min(frame.height * factor, bounds.height)
+        let x = min(max(frame.midX - width / 2, bounds.minX), bounds.maxX - width)
+        let y = min(max(frame.midY - height / 2, bounds.minY), bounds.maxY - height)
+        return CGRect(x: x, y: y, width: width, height: height)
     }
 
     enum DockSide { case left, right }
