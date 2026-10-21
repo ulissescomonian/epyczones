@@ -90,6 +90,51 @@ final class ScreenRenderTests: XCTestCase {
         try await render("editor-issues", dark: false, display: main, session: template)
     }
 
+    func testRenderWelcomeAndMenu() async throws {
+        let directory = try XCTUnwrap(outputDirectory)
+        for dark in [false, true] {
+            let suffix = dark ? "dark" : "light"
+            for (index, name) in ["accessibility", "layouts"].enumerated() {
+                let view = WelcomeView(steps: [.accessibility, .layouts], startingAt: index) {}
+                    .environment(Samples.layoutStore())
+                try await ScreenRenderer.render(
+                    view,
+                    size: CGSize(width: 620, height: 600),
+                    dark: dark,
+                    to: directory.appendingPathComponent("welcome-\(name)-\(suffix).png")
+                )
+            }
+            let reauthorize = WelcomeView(steps: [.accessibility]) {}
+                .environment(Samples.layoutStore())
+            try await ScreenRenderer.render(
+                reauthorize,
+                size: CGSize(width: 620, height: 600),
+                dark: dark,
+                to: directory.appendingPathComponent("welcome-again-\(suffix).png")
+            )
+
+            // Menu items show images, so check the thumbnails at their real size.
+            let thumbnails = VStack(alignment: .leading, spacing: 6) {
+                ForEach(Layout.templates + [Samples.grid, Samples.coding]) { layout in
+                    HStack(spacing: 6) {
+                        Image(nsImage: MenuThumbnail.image(for: layout.zones, aspectRatio: 1.88, dark: dark))
+                        Image(nsImage: MenuThumbnail.image(for: layout.zones, aspectRatio: 0.43, dark: dark))
+                        Text(verbatim: layout.name).font(.system(size: 13))
+                    }
+                }
+            }
+            .padding(12)
+            .frame(width: 260, height: 300, alignment: .topLeading)
+            .background(Color(nsColor: .windowBackgroundColor))
+            try await ScreenRenderer.render(
+                thumbnails,
+                size: CGSize(width: 260, height: 300),
+                dark: dark,
+                to: directory.appendingPathComponent("menu-thumbnails-\(suffix).png")
+            )
+        }
+    }
+
     func testRenderAppRuleEditor() async throws {
         let directory = try XCTUnwrap(outputDirectory)
         var draft = AppRuleDraft()

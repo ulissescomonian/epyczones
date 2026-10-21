@@ -96,6 +96,12 @@ final class AppSettings {
     }
 
     /// Preferences written by 1.0.x that nothing reads anymore.
+    /// True once the welcome window has run, or for a copy that was already
+    /// set up before it existed.
+    var hasCompletedOnboarding: Bool {
+        didSet { UserDefaults.standard.set(hasCompletedOnboarding, forKey: "hasCompletedOnboarding") }
+    }
+
     private static let retiredKeys = ["hasPromptedAccessibility", "launchAtLogin"]
 
     private init() {
@@ -132,6 +138,7 @@ final class AppSettings {
         self.edgeSnapTopMaximize = defaults.bool(forKey: "edgeSnapTopMaximize")
         self.edgeSnapIgnoresSharedEdges = defaults.bool(forKey: "edgeSnapIgnoresSharedEdges")
         self.overlayTheme = defaults.string(forKey: "overlayTheme") ?? "auto"
+        self.hasCompletedOnboarding = defaults.bool(forKey: "hasCompletedOnboarding")
         if let data = defaults.data(forKey: "customHotKeys"),
            let decoded = try? JSONDecoder().decode([String: HotKeyBinding].self, from: data) {
             self.customHotKeys = decoded

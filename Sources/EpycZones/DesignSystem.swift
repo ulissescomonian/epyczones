@@ -132,6 +132,7 @@ struct ZoneMap: View {
     var highlighted: Set<Int> = []
     var showsNumbers = false
     var cornerRadius: CGFloat = 3
+    var lineWidth: CGFloat = 1
 
     var body: some View {
         GeometryReader { geometry in
@@ -156,7 +157,7 @@ struct ZoneMap: View {
                         RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
                             .fill(color.opacity(isHighlighted ? 0.34 : 0.10))
                         RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                            .strokeBorder(color.opacity(isHighlighted ? 0.95 : 0.35), lineWidth: 1)
+                            .strokeBorder(color.opacity(isHighlighted ? 0.95 : 0.35), lineWidth: lineWidth)
                         if showsNumbers {
                             Text(verbatim: "\(index + 1)")
                                 .font(.system(size: max(8, min(rect.width, rect.height) * 0.38), weight: .bold, design: .rounded))

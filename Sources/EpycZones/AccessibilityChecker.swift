@@ -1,5 +1,6 @@
 import ApplicationServices
 import AppKit
+import Observation
 import OSLog
 
 @MainActor
@@ -24,11 +25,40 @@ enum AccessibilityChecker {
         }
     }
 
+    static let privacySettingsURL = URL(
+        string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility"
+    )!
+
+    /// Adds EpycZones to the Accessibility list and opens it there.
+    static func openPrivacySettings() {
+        requestAccess()
+        NSWorkspace.shared.open(privacySettingsURL)
+    }
+
     /// Show the Accessibility prompt if permission is not granted.
     static func requestAccess() {
         // The value of kAXTrustedCheckOptionPrompt, spelled out: the imported
         // global is a mutable C variable that strict concurrency rejects.
         let options = ["AXTrustedCheckOptionPrompt": true] as CFDictionary
         AXIsProcessTrustedWithOptions(options)
+    }
+}
+
+/// Whether Accessibility is allowed, as views can observe it. The app
+/// delegate refreshes it, since changes arrive from System Settings.
+@Observable
+@MainActor
+final class AccessibilityStatus {
+    static let shared = AccessibilityStatus()
+
+    private(set) var isGranted = AccessibilityChecker.isGranted
+
+    private init() {}
+
+    func refresh() {
+        let granted = AccessibilityChecker.isGranted
+        if granted != isGranted {
+            isGranted = granted
+        }
     }
 }

@@ -44,40 +44,35 @@ struct GeneralSettingsPane: View {
 
 /// Live Accessibility status with a way to fix it.
 struct AccessibilityStatusRow: View {
-    private static let privacySettings = URL(
-        string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility"
-    )!
+    private var status = AccessibilityStatus.shared
 
     var body: some View {
-        // Permission changes arrive from System Settings, so poll while visible.
-        TimelineView(.periodic(from: .now, by: 2)) { _ in
-            let granted = AccessibilityChecker.isGranted
-            HStack(spacing: 12) {
-                IconTile(symbol: "hand.raised.fill", color: .blue, size: 30)
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("Accessibility")
-                    Group {
-                        if granted {
-                            Text("EpycZones can move and resize the windows of other apps.")
-                        } else {
-                            Text("Needed to move and resize the windows of other apps.")
-                        }
+        let granted = status.isGranted
+        HStack(spacing: 12) {
+            IconTile(symbol: "hand.raised.fill", color: .blue, size: 30)
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Accessibility")
+                Group {
+                    if granted {
+                        Text("EpycZones can move and resize the windows of other apps.")
+                    } else {
+                        Text("Needed to move and resize the windows of other apps.")
                     }
-                    .font(.callout)
-                    .foregroundStyle(.secondary)
                 }
-                Spacer(minLength: 12)
-                if granted {
-                    Label("Allowed", systemImage: "checkmark.circle.fill")
-                        .foregroundStyle(.green)
-                        .font(.callout.weight(.medium))
-                } else {
-                    Button("Open Privacy Settings…") {
-                        NSWorkspace.shared.open(Self.privacySettings)
-                    }
+                .font(.callout)
+                .foregroundStyle(.secondary)
+            }
+            Spacer(minLength: 12)
+            if granted {
+                Label("Allowed", systemImage: "checkmark.circle.fill")
+                    .foregroundStyle(.green)
+                    .font(.callout.weight(.medium))
+            } else {
+                Button("Open Privacy Settings…") {
+                    AccessibilityChecker.openPrivacySettings()
                 }
             }
-            .padding(.vertical, 2)
         }
+        .padding(.vertical, 2)
     }
 }

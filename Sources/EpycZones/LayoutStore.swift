@@ -276,6 +276,19 @@ final class LayoutStore {
         case defaultLayout
     }
 
+    /// Where choosing a layout for a display applies: its current Desktop
+    /// when that Desktop has a layout of its own, so the choice shows at
+    /// once, otherwise the display.
+    func choiceTarget(forDisplay displayUUID: String) -> Target {
+        if !spaceLayouts.isEmpty,
+           let screen = NSScreen.screens.first(where: { $0.displayUUID() == displayUUID }),
+           let space = SpaceDetector.shared.currentSpaceUUID(for: screen),
+           layout(id: spaceLayouts[space]) != nil {
+            return .space(space)
+        }
+        return .display(displayUUID)
+    }
+
     func assign(_ layoutID: UUID, to target: Target) {
         switch target {
         case .display(let uuid): displayLayouts[uuid] = layoutID

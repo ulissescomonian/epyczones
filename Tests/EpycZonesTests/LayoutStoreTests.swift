@@ -86,4 +86,18 @@ final class LayoutStoreTests: XCTestCase {
         XCTAssertNil(store.displayLayouts["uuid-gone"])
         XCTAssertTrue(store.disconnectedDisplays(connected: []).isEmpty)
     }
+
+    func testTheWelcomeSuggestsATemplateThatSuitsEachDisplay() {
+        func display(_ width: CGFloat, _ height: CGFloat) -> DisplayInfo {
+            DisplayInfo(
+                id: "d", name: "Display",
+                frame: CGRect(x: 0, y: 0, width: width, height: height),
+                visibleFrame: CGRect(x: 0, y: 0, width: width, height: height - 30),
+                backingScale: 1, isPrimary: false
+            )
+        }
+        XCTAssertEqual(LayoutTemplate.suggested(for: display(1080, 2560)), .twoRows)
+        XCTAssertEqual(LayoutTemplate.suggested(for: display(3440, 1440)), .threeColumns)
+        XCTAssertEqual(LayoutTemplate.suggested(for: display(3840, 2160)), .twoColumns)
+    }
 }

@@ -66,6 +66,11 @@ struct SettingsView: View {
                 .navigationTitle(pane.title)
         }
         .frame(minWidth: 760, minHeight: 560)
+        .onChange(of: AppNavigation.shared.settingsPane, initial: true) { _, pane in
+            guard let pane else { return }
+            selection = pane
+            AppNavigation.shared.settingsPane = nil
+        }
     }
 
     @ViewBuilder

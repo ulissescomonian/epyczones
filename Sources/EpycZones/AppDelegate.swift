@@ -3,8 +3,10 @@ import AppKit
 @MainActor
 class AppDelegate: NSObject, NSApplicationDelegate {
     private let dragDetector = DragDetector()
-    /// Polls until Accessibility is granted, then stops.
+    /// Follows the Accessibility permission, which changes in System Settings.
     private var accessibilityPoll: Timer?
+    /// Hotkeys, rules and window restore start once, when the permission is there.
+    private var startedAccessibilityFeatures = false
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)
@@ -39,9 +41,25 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         // Hotkeys + window snapping require accessibility
         if AccessibilityChecker.isGranted {
             onAccessibilityReady()
-        } else {
-            AccessibilityChecker.requestAccess()
-            pollAccessibility()
+        }
+        pollAccessibility()
+        showWelcomeIfNeeded()
+    }
+
+    /// The welcome window: both steps on a first run, and only the
+    /// permission step when an installed copy lost Accessibility, as an
+    /// update with a new signature makes it.
+    private func showWelcomeIfNeeded() {
+        let settings = AppSettings.shared
+        let isFirstRun = !settings.hasCompletedOnboarding
+            && !FileManager.default.fileExists(atPath: AppPaths.file("layouts.json").path)
+        if !isFirstRun {
+            settings.hasCompletedOnboarding = true
+        }
+        if isFirstRun {
+            WelcomeWindowController.shared.show(steps: [.accessibility, .layouts])
+        } else if !AccessibilityChecker.isGranted {
+            WelcomeWindowController.shared.show(steps: [.accessibility])
         }
     }
 
@@ -71,6 +89,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     private func onAccessibilityReady() {
+        guard !startedAccessibilityFeatures else { return }
+        startedAccessibilityFeatures = true
         HotKeyManager.shared.registerDefaults()
         HotKeyManager.shared.registerZoneHotKeys()
         AppRuleMonitor.shared.start()
@@ -87,9 +107,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         // Scheduled on the main run loop, so the block runs on the main thread.
         accessibilityPoll = Timer.scheduledTimer(withTimeInterval: 2.0, repeats: true) { [weak self] _ in
             MainActor.assumeIsolated {
-                guard let self, AccessibilityChecker.isGranted else { return }
-                self.accessibilityPoll?.invalidate()
-                self.accessibilityPoll = nil
+                AccessibilityStatus.shared.refresh()
+                guard let self, AccessibilityStatus.shared.isGranted else { return }
                 self.onAccessibilityReady()
             }
         }

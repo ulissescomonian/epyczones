@@ -53,6 +53,13 @@ struct LayoutsView: View {
             }
         }
         .frame(minWidth: 920, minHeight: 620)
+        .onChange(of: AppNavigation.shared.layoutsDisplayID, initial: true) { _, id in
+            guard let id else { return }
+            if displays.contains(where: { $0.id == id }) {
+                selectedDisplayID = id
+            }
+            AppNavigation.shared.layoutsDisplayID = nil
+        }
         .onReceive(NotificationCenter.default.publisher(for: NSApplication.didChangeScreenParametersNotification)) { _ in
             displays = DisplayInfo.connected()
             if !displays.contains(where: { $0.id == selectedDisplayID }) {
@@ -135,11 +142,12 @@ private struct LayoutsSidebar: View {
 }
 
 /// The connected displays drawn as they are arranged in Displays settings,
-/// each with its layout. Clicking one selects it.
-private struct DisplayArrangementMap: View {
+/// each with its layout. With a selection, clicking one selects it and the
+/// others dim.
+struct DisplayArrangementMap: View {
     @Environment(LayoutStore.self) private var store
     let displays: [DisplayInfo]
-    @Binding var selection: String?
+    var selection: Binding<String?>?
 
     var body: some View {
         GeometryReader { geometry in
@@ -161,7 +169,8 @@ private struct DisplayArrangementMap: View {
                         width: display.frame.width * scale,
                         height: display.frame.height * scale
                     ).insetBy(dx: 2, dy: 2)
-                    let isSelected = display.id == selection
+                    let isSelected = display.id == selection?.wrappedValue
+                    let isDimmed = selection != nil && !isSelected
 
                     ZoneMap(
                         zones: store.resolution(forDisplay: display.id, name: display.name).layout.zones,
@@ -183,10 +192,10 @@ private struct DisplayArrangementMap: View {
                             .strokeBorder(isSelected ? Color.accentColor : .clear, lineWidth: 2)
                             .padding(-3)
                     }
-                    .opacity(isSelected ? 1 : 0.55)
+                    .opacity(isDimmed ? 0.55 : 1)
                     .frame(width: rect.width, height: rect.height)
                     .contentShape(Rectangle())
-                    .onTapGesture { selection = display.id }
+                    .onTapGesture { selection?.wrappedValue = display.id }
                     .offset(x: rect.minX, y: rect.minY)
                     .help(display.name)
                     .accessibilityElement()
@@ -360,13 +369,8 @@ struct DisplayLayoutsView: View {
         display.screen.flatMap { SpaceDetector.shared.currentSpace(for: $0) }
     }
 
-    /// Where choosing a layout applies: the current Desktop when it has a
-    /// layout of its own, so the choice is visible right away, else the display.
     private var target: LayoutStore.Target {
-        if resolution.source == .space, let space = currentSpace {
-            return .space(space.uuid)
-        }
-        return .display(display.id)
+        store.choiceTarget(forDisplay: display.id)
     }
 
     var body: some View {
