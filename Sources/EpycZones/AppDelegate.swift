@@ -54,7 +54,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     private func onSpaceChanged() {
         // Show notification if the layout changed due to per-space assignment
-        guard let screen = NSScreen.main,
+        guard !LayoutStore.shared.spaceLayouts.isEmpty,
+              let screen = NSScreen.main,
               let spaceUUID = SpaceDetector.shared.currentSpaceUUID(for: screen),
               let _ = LayoutStore.shared.spaceLayouts[spaceUUID],
               let layout = LayoutStore.shared.activeLayout(for: screen) else { return }

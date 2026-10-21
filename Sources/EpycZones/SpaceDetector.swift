@@ -14,8 +14,10 @@ private func CGSGetActiveSpace(_ cid: CGSConnectionID) -> CGSSpaceID
 @_silgen_name("CGSManagedDisplayGetCurrentSpace")
 private func CGSManagedDisplayGetCurrentSpace(_ cid: CGSConnectionID, _ displayUuid: CFString) -> CGSSpaceID
 
+/// Optional: a private API may return NULL, which a non-optional CFArray
+/// would turn into a crash.
 @_silgen_name("CGSCopyManagedDisplaySpaces")
-private func CGSCopyManagedDisplaySpaces(_ cid: CGSConnectionID) -> CFArray
+private func CGSCopyManagedDisplaySpaces(_ cid: CGSConnectionID) -> CFArray?
 
 // MARK: - NSScreen Display UUID
 
@@ -63,7 +65,8 @@ final class SpaceDetector {
 
     /// Get all user-desktop spaces across all displays.
     func allSpaces() -> [SpaceInfo] {
-        let displays = CGSCopyManagedDisplaySpaces(cgsConnection) as! [NSDictionary]
+        // The payload shape is undocumented; an unexpected one means no Spaces, not a crash.
+        guard let displays = CGSCopyManagedDisplaySpaces(cgsConnection) as? [NSDictionary] else { return [] }
         var result: [SpaceInfo] = []
 
         for display in displays {

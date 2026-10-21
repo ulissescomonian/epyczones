@@ -30,7 +30,7 @@ final class LayoutStore {
     /// Active layout for a specific screen. Priority: per-space → per-display → global default.
     func activeLayout(for screen: NSScreen) -> Layout? {
         Self.resolveLayout(
-            spaceUUID: SpaceDetector.shared.currentSpaceUUID(for: screen),
+            spaceUUID: currentSpaceUUID(for: screen),
             displayUUID: screen.displayUUID(),
             screenName: screen.localizedName,
             layouts: layouts,
@@ -39,6 +39,12 @@ final class LayoutStore {
             legacyScreenLayouts: legacyScreenLayouts,
             defaultLayoutID: activeLayoutID
         )
+    }
+
+    /// The screen's current Space, read only when some Space has a layout:
+    /// the lookup goes through private CGS APIs on every call.
+    private func currentSpaceUUID(for screen: NSScreen) -> String? {
+        spaceLayouts.isEmpty ? nil : SpaceDetector.shared.currentSpaceUUID(for: screen)
     }
 
     /// Pure precedence rule behind `activeLayout(for:)`: per-space →
@@ -232,7 +238,7 @@ final class LayoutStore {
     func cycleLayout(on screen: NSScreen) -> Layout? {
         guard layouts.count > 1 else { return nil }
 
-        let spaceUUID = SpaceDetector.shared.currentSpaceUUID(for: screen)
+        let spaceUUID = currentSpaceUUID(for: screen)
         let displayUUID = screen.displayUUID()
         let scope = Self.effectiveScope(
             spaceUUID: spaceUUID,

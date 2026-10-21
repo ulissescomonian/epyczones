@@ -44,6 +44,8 @@ final class DragDetector {
     private var windowStartPos: CGPoint?
     /// The dragged window has moved during this gesture: it is a window drag.
     private var windowHasMoved = false
+    /// Layouts resolved during this gesture; see `gestureLayout(for:)`.
+    private var gestureLayouts: [NSScreen: Layout?] = [:]
 
     /// Timer for edge snap delay.
     private var edgeSnapTimer: Timer?
@@ -105,6 +107,7 @@ final class DragDetector {
         draggedWindow = nil
         windowStartPos = nil
         windowHasMoved = false
+        gestureLayouts = [:]
         snapSuppressed = false
         pendingDragRestoreSize = nil
         didDragRestore = false
@@ -190,7 +193,7 @@ final class DragDetector {
             overlay.hide()
 
             if let screen = screen, !zoneIndices.isEmpty,
-               let layout = LayoutStore.shared.activeLayout(for: screen),
+               let layout = gestureLayout(for: screen),
                let window = draggedWindow {
                 let validIndices = zoneIndices.filter { $0 < layout.zones.count }
                 if validIndices.count == 1, let index = validIndices.first {
@@ -244,6 +247,7 @@ final class DragDetector {
         draggedWindow = nil
         windowStartPos = nil
         windowHasMoved = false
+        gestureLayouts = [:]
         snapSuppressed = false
         pendingDragRestoreSize = nil
         didDragRestore = false
@@ -282,13 +286,21 @@ final class DragDetector {
     private func showOverlay() {
         guard !isOverlayVisible else { return }
         // Check that at least one screen has a layout with zones
-        let store = LayoutStore.shared
         guard NSScreen.screens.contains(where: { screen in
-            let l = store.activeLayout(for: screen)
+            let l = gestureLayout(for: screen)
             return l != nil && !l!.zones.isEmpty
         }) else { return }
         isOverlayVisible = true
-        overlay.show { screen in store.activeLayout(for: screen) }
+        overlay.show { screen in gestureLayout(for: screen) }
+    }
+
+    /// Each screen's active layout, resolved once per gesture: the drag
+    /// handlers ask on every mouse event, and resolving can query Spaces.
+    private func gestureLayout(for screen: NSScreen) -> Layout? {
+        if let cached = gestureLayouts[screen] { return cached }
+        let resolved = LayoutStore.shared.activeLayout(for: screen)
+        gestureLayouts[screen] = .some(resolved)
+        return resolved
     }
 
     private func updateHighlight(at nsPoint: NSPoint) {
@@ -304,7 +316,7 @@ final class DragDetector {
 
         if snap, !zoneIndices.isEmpty, let window = draggedWindow,
            let screen = screen,
-           let layout = LayoutStore.shared.activeLayout(for: screen) {
+           let layout = gestureLayout(for: screen) {
             let validIndices = zoneIndices.filter { $0 < layout.zones.count }
             guard !validIndices.isEmpty else { return }
             let zones = validIndices.map { layout.zones[$0] }
@@ -398,7 +410,7 @@ final class DragDetector {
     /// and the screen the cursor is on.
     private func zoneIndices(at nsPoint: NSPoint) -> (Set<Int>, NSScreen?) {
         guard let screen = NSScreen.screens.first(where: { $0.frame.contains(nsPoint) }),
-              let layout = LayoutStore.shared.activeLayout(for: screen) else { return ([], nil) }
+              let layout = gestureLayout(for: screen) else { return ([], nil) }
 
         let vf = screen.visibleFrame
         let relative = CGPoint(
