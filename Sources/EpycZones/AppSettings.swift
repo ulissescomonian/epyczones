@@ -19,11 +19,18 @@ final class AppSettings {
         didSet { UserDefaults.standard.set(animateSnap, forKey: "animateSnap") }
     }
 
-    /// Launch at login.
+    /// Launch at login, read from the system's login items rather than a
+    /// stored preference, so the switch shows what macOS will actually do.
     var launchAtLogin: Bool {
         didSet {
-            UserDefaults.standard.set(launchAtLogin, forKey: "launchAtLogin")
+            // Also ends the correction below if it re-enters this observer.
+            guard launchAtLogin != Self.loginItemIsEnabled else { return }
             updateLoginItem()
+            // Show what macOS accepted, e.g. after a failed registration.
+            let actual = Self.loginItemIsEnabled
+            if launchAtLogin != actual {
+                launchAtLogin = actual
+            }
         }
     }
 
@@ -78,7 +85,6 @@ final class AppSettings {
         defaults.register(defaults: [
             "zoneGap": 0.0,
             "animateSnap": true,
-            "launchAtLogin": false,
             "restoreWindowsOnLaunch": true,
             "edgeSnapEnabled": true,
             "edgeSnapThreshold": 30.0,
@@ -89,7 +95,7 @@ final class AppSettings {
         ])
         self.zoneGap = defaults.double(forKey: "zoneGap")
         self.animateSnap = defaults.bool(forKey: "animateSnap")
-        self.launchAtLogin = defaults.bool(forKey: "launchAtLogin")
+        self.launchAtLogin = Self.loginItemIsEnabled
         self.restoreWindowsOnLaunch = defaults.bool(forKey: "restoreWindowsOnLaunch")
         self.edgeSnapEnabled = defaults.bool(forKey: "edgeSnapEnabled")
         self.edgeSnapThreshold = defaults.double(forKey: "edgeSnapThreshold")
@@ -117,17 +123,26 @@ final class AppSettings {
         }
     }
 
+    /// Registered as a login item. Awaiting the user's approval in System
+    /// Settings still counts: the registration exists.
+    private static var loginItemIsEnabled: Bool {
+        switch SMAppService.mainApp.status {
+        case .enabled, .requiresApproval:
+            return true
+        default:
+            return false
+        }
+    }
+
     private func updateLoginItem() {
-        if #available(macOS 13.0, *) {
-            do {
-                if launchAtLogin {
-                    try SMAppService.mainApp.register()
-                } else {
-                    try SMAppService.mainApp.unregister()
-                }
-            } catch {
-                Log.app.error("Login item error: \(error.localizedDescription, privacy: .public)")
+        do {
+            if launchAtLogin {
+                try SMAppService.mainApp.register()
+            } else {
+                try SMAppService.mainApp.unregister()
             }
+        } catch {
+            Log.app.error("Login item error: \(error.localizedDescription, privacy: .public)")
         }
     }
 }
