@@ -51,8 +51,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     /// update with a new signature makes it.
     private func showWelcomeIfNeeded() {
         let settings = AppSettings.shared
-        let isFirstRun = !settings.hasCompletedOnboarding
-            && !FileManager.default.fileExists(atPath: AppPaths.file("layouts.json").path)
+        // Asked of the store, which knows whether the file was there before
+        // it saved the names of the connected displays.
+        let isFirstRun = !settings.hasCompletedOnboarding && !LayoutStore.shared.hadSavedState
         if !isFirstRun {
             settings.hasCompletedOnboarding = true
         }

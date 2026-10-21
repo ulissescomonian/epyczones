@@ -430,33 +430,7 @@ private struct LayoutInspector: View {
 
     private var orderSection: some View {
         Section {
-            ForEach(Array(session.zones.enumerated()), id: \.element.id) { index, zone in
-                HStack(spacing: 10) {
-                    Text(verbatim: "\(index + 1)")
-                        .font(.system(.callout, design: .rounded).weight(.bold))
-                        .foregroundStyle(.white)
-                        .frame(width: 20, height: 20)
-                        .background(Circle().fill(ZonePalette.color(index)))
-                    if zone.name.isEmpty {
-                        Text("Zone \(index + 1)")
-                            .foregroundStyle(.secondary)
-                    } else {
-                        Text(verbatim: zone.name)
-                    }
-                    Spacer(minLength: 8)
-                    if index < shortcuts.count {
-                        Text(verbatim: shortcuts[index].displayString)
-                            .font(.callout)
-                            .foregroundStyle(.secondary)
-                    }
-                }
-                .contentShape(Rectangle())
-                .onTapGesture { session.selection = zone.id }
-                .listRowBackground(zone.id == session.selection ? Color.accentColor.opacity(0.14) : nil)
-            }
-            .onMove { source, destination in
-                session.moveZones(fromOffsets: source, toOffset: destination)
-            }
+            ZoneOrderList(session: session, shortcuts: shortcuts)
         } header: {
             Text("Order")
         } footer: {
@@ -524,6 +498,87 @@ private struct PercentField: View {
             .focused(focus, equals: field)
             Text(verbatim: "%")
                 .foregroundStyle(.secondary)
+        }
+    }
+}
+
+/// The zones in shortcut order. Dropping a zone on another gives it that
+/// zone's number. Built from plain rows, since a grouped form on macOS does
+/// not reorder its own rows.
+private struct ZoneOrderList: View {
+    let session: LayoutEditSession
+    let shortcuts: [HotKeyBinding]
+    @State private var dropTarget: UUID?
+
+    var body: some View {
+        VStack(spacing: 0) {
+            ForEach(Array(session.zones.enumerated()), id: \.element.id) { index, zone in
+                if index > 0 {
+                    Divider().padding(.leading, 30)
+                }
+                row(index: index, zone: zone)
+            }
+        }
+    }
+
+    private func row(index: Int, zone: Zone) -> some View {
+        let isSelected = zone.id == session.selection
+        let isTarget = zone.id == dropTarget
+
+        return HStack(spacing: 10) {
+            Text(verbatim: "\(index + 1)")
+                .font(.system(.callout, design: .rounded).weight(.bold))
+                .foregroundStyle(.white)
+                .frame(width: 20, height: 20)
+                .background(Circle().fill(ZonePalette.color(index)))
+            if zone.name.isEmpty {
+                Text("Zone \(index + 1)")
+                    .foregroundStyle(.secondary)
+            } else {
+                Text(verbatim: zone.name)
+            }
+            Spacer(minLength: 8)
+            if index < shortcuts.count {
+                Text(verbatim: shortcuts[index].displayString)
+                    .font(.callout)
+                    .foregroundStyle(.secondary)
+            }
+            Image(systemName: "line.3.horizontal")
+                .font(.callout)
+                .foregroundStyle(.tertiary)
+        }
+        .padding(.vertical, 7)
+        .padding(.horizontal, 6)
+        .background(
+            RoundedRectangle(cornerRadius: 6, style: .continuous)
+                .fill(isTarget
+                    ? Color.accentColor.opacity(0.22)
+                    : isSelected ? Color.accentColor.opacity(0.12) : .clear)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 6, style: .continuous)
+                .strokeBorder(isTarget ? Color.accentColor : .clear, lineWidth: 1.5)
+        )
+        .contentShape(Rectangle())
+        .onTapGesture { session.selection = zone.id }
+        .draggable(zone.id.uuidString)
+        .dropDestination(for: String.self) { items, _ in
+            guard let raw = items.first, let id = UUID(uuidString: raw), id != zone.id else { return false }
+            session.renumber(id, to: index + 1)
+            session.selection = id
+            return true
+        } isTargeted: { targeted in
+            if targeted {
+                dropTarget = zone.id
+            } else if dropTarget == zone.id {
+                dropTarget = nil
+            }
+        }
+        .contextMenu {
+            Button("Move Up") { session.renumber(zone.id, to: index) }
+                .disabled(index == 0)
+            Button("Move Down") { session.renumber(zone.id, to: index + 2) }
+                .disabled(index == session.zones.count - 1)
         }
     }
 }

@@ -299,7 +299,7 @@ func keyCodeName(_ keyCode: UInt32) -> String {
     case kVK_DownArrow:    return "↓"
     case kVK_Return:       return "⏎"
     case kVK_Tab:          return "⇥"
-    case kVK_Space:        return "Space"
+    case kVK_Space:        return String(localized: "Space")
     case kVK_Delete:       return "⌫"
     case kVK_Escape:       return "⎋"
     case kVK_ANSI_Minus:   return "-"

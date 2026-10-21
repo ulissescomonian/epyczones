@@ -134,6 +134,10 @@ final class LayoutStore {
     /// Where layouts persist; nil keeps them in memory, for screen renders.
     private let fileURL: URL?
 
+    /// True when saved layouts were on disk at launch, before this store
+    /// wrote anything. False on a first run.
+    private(set) var hadSavedState = false
+
     init(fileURL: URL?) {
         self.fileURL = fileURL
         load()
@@ -174,8 +178,9 @@ final class LayoutStore {
     }
 
     func load() {
-        guard let fileURL, let data = try? Data(contentsOf: fileURL),
-              let model = try? JSONDecoder().decode(StorageModel.self, from: data) else { return }
+        guard let fileURL, let data = try? Data(contentsOf: fileURL) else { return }
+        hadSavedState = true
+        guard let model = try? JSONDecoder().decode(StorageModel.self, from: data) else { return }
         layouts = model.layouts
         defaultLayoutID = model.activeLayoutID
         legacyScreenLayouts = model.screenLayouts ?? [:]

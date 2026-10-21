@@ -103,7 +103,7 @@ private class LayoutNotificationView: NSView {
             .font: NSFont.systemFont(ofSize: 12, weight: .regular),
             .foregroundColor: NSColor.white.withAlphaComponent(0.6),
         ]
-        let countStr = NSAttributedString(string: "\(zoneCount) zones", attributes: countAttrs)
+        let countStr = NSAttributedString(string: String(localized: "\(zoneCount) zones"), attributes: countAttrs)
         let countSize = countStr.size()
 
         let totalHeight = nameSize.height + countSize.height + 2

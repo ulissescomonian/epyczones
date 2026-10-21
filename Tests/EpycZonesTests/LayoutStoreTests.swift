@@ -100,4 +100,18 @@ final class LayoutStoreTests: XCTestCase {
         XCTAssertEqual(LayoutTemplate.suggested(for: display(3440, 1440)), .threeColumns)
         XCTAssertEqual(LayoutTemplate.suggested(for: display(3840, 2160)), .twoColumns)
     }
+
+    func testAFirstRunIsToldApartFromAnExistingCopy() throws {
+        let file = FileManager.default.temporaryDirectory
+            .appendingPathComponent("layouts-\(UUID().uuidString).json")
+        defer { try? FileManager.default.removeItem(at: file) }
+
+        // The first store may save display names, but it started without a file.
+        let first = LayoutStore(fileURL: file)
+        XCTAssertFalse(first.hadSavedState)
+        first.save(first.blankLayout())
+
+        XCTAssertTrue(LayoutStore(fileURL: file).hadSavedState)
+    }
 }
+

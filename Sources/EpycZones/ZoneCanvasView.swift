@@ -329,7 +329,16 @@ struct ZoneCanvasView: View {
 
     // MARK: - Keyboard
 
+    /// What the Delete keys type. The Mac's Delete key sends U+007F, which
+    /// is neither `KeyEquivalent.delete` (U+0008) nor `.deleteForward`.
+    private static let deleteCharacters: Set<String> = ["\u{7F}", "\u{8}", "\u{F728}"]
+
     private func handleKey(_ press: KeyPress) -> KeyPress.Result {
+        if Self.deleteCharacters.contains(press.characters) {
+            guard let id = session.selection else { return .ignored }
+            session.delete(id)
+            return .handled
+        }
         let resizing = press.modifiers.contains(.shift)
         switch press.key {
         case .leftArrow: session.nudgeSelection(dx: -1, dy: 0, resizing: resizing)
@@ -337,9 +346,6 @@ struct ZoneCanvasView: View {
         case .upArrow: session.nudgeSelection(dx: 0, dy: -1, resizing: resizing)
         case .downArrow: session.nudgeSelection(dx: 0, dy: 1, resizing: resizing)
         case .tab: session.selectNext(backward: press.modifiers.contains(.shift))
-        case .delete, .deleteForward:
-            guard let id = session.selection else { return .ignored }
-            session.delete(id)
         default:
             return .ignored
         }

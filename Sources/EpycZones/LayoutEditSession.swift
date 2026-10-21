@@ -187,10 +187,6 @@ final class LayoutEditSession {
         }
     }
 
-    func moveZones(fromOffsets source: IndexSet, toOffset destination: Int) {
-        perform { $0.move(fromOffsets: source, toOffset: destination) }
-    }
-
     func sortByPosition() {
         perform { $0 = LayoutGeometry.sortedByPosition($0) }
     }

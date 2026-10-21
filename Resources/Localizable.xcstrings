@@ -321,6 +321,46 @@
         }
       }
     },
+    "%lld zones": {
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld zone"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld zones"
+                }
+              }
+            }
+          }
+        },
+        "pt-BR": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld zona"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld zonas"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "2 Columns": {
       "localizations": {
         "pt-BR": {
@@ -1831,6 +1871,26 @@
         }
       }
     },
+    "Move Down": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mover para Baixo"
+          }
+        }
+      }
+    },
+    "Move Up": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mover para Cima"
+          }
+        }
+      }
+    },
     "Move the focused window from the keyboard. Click a shortcut, then press the new keys.": {
       "localizations": {
         "pt-BR": {
@@ -2765,6 +2825,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Código-Fonte no GitHub"
+          }
+        }
+      }
+    },
+    "Space": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Espaço"
           }
         }
       }
