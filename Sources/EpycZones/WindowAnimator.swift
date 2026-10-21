@@ -14,10 +14,14 @@ enum WindowAnimator {
 
     /// Smoothly animate a window from its current position/size to a target frame.
     /// `targetNS` is in NSScreen coordinates (bottom-left origin).
-    /// Can be called from any thread.
+    /// Call on the main thread: the starting frame is read synchronously.
+    ///
+    /// - Parameter isCurrent: Checked before every step; once it returns
+    ///   false, a newer write owns the window and the remaining steps are skipped.
     static func animate(
         window: AXUIElement,
         to targetNS: CGRect,
+        isCurrent: @escaping () -> Bool = { true },
         completion: ((Bool) -> Void)? = nil
     ) {
         let primaryHeight = NSScreen.screens[0].frame.height
@@ -44,6 +48,10 @@ enum WindowAnimator {
         for i in 1...steps {
             let delay = stepInterval * Double(i - 1)
             DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
+                guard isCurrent() else {
+                    if i == steps { finish(succeeded: result.succeeded, completion: completion) }
+                    return
+                }
                 let t = easeOutCubic(Double(i) / Double(steps))
 
                 let x = currentPos.x + (targetAX.x - currentPos.x) * t

@@ -4,10 +4,9 @@ import OSLog
 
 enum WindowManager {
 
-    /// Undo stack per window (key = window hash). Each entry is a frame before a snap.
-    private static var undoStacks: [Int: [CGRect]] = [:]
-    /// Redo stack per window.
-    private static var redoStacks: [Int: [CGRect]] = [:]
+    /// Undo stack per window. Each entry is a frame before a snap or resize,
+    /// most recent last.
+    private static var undoStacks = WindowStateMap<[CGRect]>()
     private static let maxUndoDepth = 20
     private static var lastAXLogTimes: [String: TimeInterval] = [:]
     private static let axLogThrottleInterval: TimeInterval = 5
@@ -64,16 +63,20 @@ enum WindowManager {
         default:         cycle = []
         }
         if !cycle.isEmpty {
-            let key = windowHash(window)
             let current = currentNSFrame(of: window)
+            let now = ProcessInfo.processInfo.systemUptime
 
             // Find the window's current cycle step. Prefer the recorded state:
             // apps can clamp the requested width (min width > 1/3 of the screen,
             // or grid-rounded sizing like Terminal), so the frame never matches
-            // the step exactly — compare origin and height only. Fall back to
-            // geometric matching when there is no recorded state.
+            // the step exactly — compare origin and height only. A step recorded
+            // moments ago still counts while its animation is under way. Fall
+            // back to geometric matching when there is no recorded state.
             var currentIndex: Int?
-            if let state = cycleStates[key], state.position == position, let cur = current,
+            if let state = cycleStates[window], state.position == position,
+               now - state.recordedAt < cycleAnimationGrace {
+                currentIndex = state.index
+            } else if let state = cycleStates[window], state.position == position, let cur = current,
                abs(cur.origin.x - state.frame.origin.x) < 15,
                abs(cur.origin.y - state.frame.origin.y) < 15,
                abs(cur.height - state.frame.height) < 15 {
@@ -93,7 +96,7 @@ enum WindowManager {
             let nextIndex = currentIndex.map { ($0 + 1) % cycle.count } ?? 0
             let targetNS = cycle[nextIndex].frame(in: visibleFrame)
             applySnap(targetNS, to: window)
-            cycleStates[key] = (position: position, index: nextIndex, frame: targetNS)
+            cycleStates[window] = CycleState(position: position, index: nextIndex, frame: targetNS, recordedAt: now)
             return
         }
 
@@ -155,35 +158,15 @@ enum WindowManager {
     // MARK: - Dynamic Positions
 
     private static func restoreWindow(_ window: AXUIElement, screen: NSScreen) {
-        let key = windowHash(window)
-        guard var stack = undoStacks[key], let prev = stack.popLast() else { return }
-        undoStacks[key] = stack
-
-        // Save current frame to redo stack before restoring
-        if let currentFrame = currentNSFrame(of: window) {
-            redoStacks[key, default: []].append(currentFrame)
-        }
+        guard var stack = undoStacks[window], let prev = stack.popLast() else { return }
+        undoStacks[window] = stack.isEmpty ? nil : stack
         applyFrame(prev, to: window)
-    }
-
-    /// Redo: re-apply the last undone snap.
-    static func redoSnap() {
-        guard AccessibilityChecker.isGranted else { return }
-        guard let window = getFocusedWindow() else { return }
-        let key = windowHash(window)
-        guard var stack = redoStacks[key], let next = stack.popLast() else { return }
-        redoStacks[key] = stack
-
-        // Save current frame to undo stack
-        if let currentFrame = currentNSFrame(of: window) {
-            undoStacks[key, default: []].append(currentFrame)
-        }
-        applyFrame(next, to: window)
     }
 
     private static func resizeWindow(_ window: AXUIElement, screen: NSScreen, factor: Double) {
         guard let axPos = getPosition(of: window),
               let axSize = getSize(of: window) else { return }
+        saveFrame(of: window)
 
         let primaryHeight = NSScreen.screens[0].frame.height
         let nsX = axPos.x
@@ -244,28 +227,35 @@ enum WindowManager {
         applyFrame(targetNS, to: window)
     }
 
+    /// Pushes the window's current frame onto its undo stack.
     static func saveFrame(of window: AXUIElement) {
         guard let frame = currentNSFrame(of: window) else { return }
-        let key = windowHash(window)
-        undoStacks[key, default: []].append(frame)
-        if undoStacks[key]!.count > maxUndoDepth {
-            undoStacks[key]!.removeFirst()
-        }
-        // Clear redo stack on new action
-        redoStacks[key] = nil
+        recordUndoFrame(frame, for: window)
     }
 
     // MARK: - Snap Tracking (drag-away restore)
 
-    /// Cycle step per window for repeated half-snap cycling. Stores the
-    /// requested frame so clamped windows (min width > step width) still
-    /// advance the cycle instead of looping forever.
-    private static var cycleStates: [Int: (position: SnapPosition, index: Int, frame: CGRect)] = [:]
+    /// One step of the repeated half-snap width cycle.
+    private struct CycleState {
+        let position: SnapPosition
+        let index: Int
+        /// The requested frame, so clamped windows (min width > step width)
+        /// still advance the cycle instead of looping forever.
+        let frame: CGRect
+        let recordedAt: TimeInterval
+    }
+
+    /// How long a recorded cycle step is trusted without comparing frames:
+    /// longer than the snap animation, shorter than a deliberate pause.
+    private static let cycleAnimationGrace: TimeInterval = 0.5
+
+    /// Cycle step per window for repeated half-snap cycling.
+    private static var cycleStates = WindowStateMap<CycleState>()
 
     /// Last applied snap frame per window (NS coords).
-    private static var snapFrames: [Int: CGRect] = [:]
+    private static var snapFrames = WindowStateMap<CGRect>()
     /// Window size before the first snap in a chain — restored when the window is dragged away.
-    private static var dragRestoreSizes: [Int: CGSize] = [:]
+    private static var dragRestoreSizes = WindowStateMap<CGSize>()
 
     /// Save undo frame, apply the target, and record the snap for drag-away restore.
     /// All snap paths (hotkey, zone, drag, edge, app rule) should go through here.
@@ -728,34 +718,32 @@ enum WindowManager {
             recordUndoFrame(preSnapFrame, for: window)
         }
 
-        let key = windowHash(window)
         // Any snap invalidates the cycle chain; the cycling code re-records
         // its state right after calling applySnap.
-        cycleStates[key] = nil
+        cycleStates[window] = nil
         if let pre = preSnapFrame {
             // Snapping from one snap position to another keeps the original restore size.
-            let wasSnapped = snapFrames[key].map { framesMatch(pre, $0, tolerance: 15) } ?? false
+            let wasSnapped = snapFrames[window].map { framesMatch(pre, $0, tolerance: 15) } ?? false
             if !wasSnapped {
-                dragRestoreSizes[key] = pre.size
+                dragRestoreSizes[window] = pre.size
             }
         }
-        snapFrames[key] = targetNS
+        snapFrames[window] = targetNS
     }
 
     private static func recordUndoFrame(_ frame: CGRect, for window: AXUIElement) {
-        let key = windowHash(window)
-        undoStacks[key, default: []].append(frame)
-        if undoStacks[key]!.count > maxUndoDepth {
-            undoStacks[key]!.removeFirst()
+        var stack = undoStacks[window] ?? []
+        stack.append(frame)
+        if stack.count > maxUndoDepth {
+            stack.removeFirst()
         }
-        redoStacks[key] = nil
+        undoStacks[window] = stack
     }
 
     /// If the window currently sits at its recorded snap frame, the size to restore on drag-away.
     static func dragRestoreSize(for window: AXUIElement) -> CGSize? {
-        let key = windowHash(window)
-        guard let snapped = snapFrames[key],
-              let size = dragRestoreSizes[key],
+        guard let snapped = snapFrames[window],
+              let size = dragRestoreSizes[window],
               let current = currentNSFrame(of: window),
               framesMatch(current, snapped, tolerance: 15) else { return nil }
         return size
@@ -781,18 +769,6 @@ enum WindowManager {
             width: axSize.width,
             height: axSize.height
         )
-    }
-
-    private static func windowHash(_ window: AXUIElement) -> Int {
-        let pid = processID(of: window)
-        // Combine PID with window title for uniqueness
-        var title: AnyObject?
-        AXUIElementCopyAttributeValue(window, kAXTitleAttribute as CFString, &title)
-        let titleStr = (title as? String) ?? ""
-        var hasher = Hasher()
-        hasher.combine(pid)
-        hasher.combine(titleStr)
-        return hasher.finalize()
     }
 
     private static func processID(of window: AXUIElement) -> pid_t {
@@ -888,6 +864,7 @@ enum WindowManager {
             width: relW * dstVF.width,
             height: relH * dstVF.height
         )
+        saveFrame(of: window)
         applyFrame(targetNS, to: window)
     }
 
@@ -907,18 +884,34 @@ enum WindowManager {
 
         // Disable AXEnhancedUserInterface (used by Terminal, Xcode, etc.)
         // which blocks programmatic resize when enabled (e.g. for VoiceOver).
+        // A write that supersedes one still animating finds it already
+        // disabled, so it inherits the duty to turn it back on.
         let appElement = getAppElement(for: window)
-        let hadEnhancedUI = shouldManageEnhancedUI(for: window) && getEnhancedUI(appElement)
-        if hadEnhancedUI {
+        let superseded = frameWrites[window]
+        let enabledNow = shouldManageEnhancedUI(for: window) && getEnhancedUI(appElement)
+        if enabledNow {
             setEnhancedUI(appElement, enabled: false)
+        }
+        let restoresEnhancedUI = enabledNow || superseded?.restoresEnhancedUI == true
+
+        nextFrameWriteToken += 1
+        let token = nextFrameWriteToken
+        frameWrites[window] = FrameWrite(token: token, restoresEnhancedUI: restoresEnhancedUI)
+        let isCurrent = { frameWrites[window]?.token == token }
+
+        let finish = {
+            // A newer write took over this window and finishes the job.
+            guard isCurrent() else { return }
+            frameWrites[window] = nil
+            if restoresEnhancedUI {
+                setEnhancedUI(appElement, enabled: true)
+            }
+            if raisesWindow { raise(window) }
         }
 
         if animated && AppSettings.shared.animateSnap {
-            WindowAnimator.animate(window: window, to: targetNS) { _ in
-                if hadEnhancedUI {
-                    setEnhancedUI(appElement, enabled: true)
-                }
-                if raisesWindow { raise(window) }
+            WindowAnimator.animate(window: window, to: targetNS, isCurrent: isCurrent) { _ in
+                finish()
             }
         } else {
             // Rectangle's approach: SIZE → POSITION → SIZE.
@@ -928,13 +921,19 @@ enum WindowManager {
             _ = setSize(of: window, to: targetNS.size)
             _ = setPosition(of: window, to: targetPos)
             _ = setSize(of: window, to: targetNS.size)
-
-            if hadEnhancedUI {
-                setEnhancedUI(appElement, enabled: true)
-            }
-            if raisesWindow { raise(window) }
+            finish()
         }
     }
+
+    /// The latest frame write per window. A new write cancels an animation
+    /// still running on the same window instead of interleaving with it.
+    private struct FrameWrite {
+        let token: Int
+        let restoresEnhancedUI: Bool
+    }
+
+    private static var frameWrites = WindowStateMap<FrameWrite>()
+    private static var nextFrameWriteToken = 0
 
     // MARK: - Window Enumeration
 
