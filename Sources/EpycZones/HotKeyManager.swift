@@ -112,16 +112,9 @@ final class HotKeyManager {
 
     /// Register hotkeys for zone indices 1-9 (Ctrl+Option+1 through Ctrl+Option+9).
     func registerZoneHotKeys() {
-        let mods = UInt32(controlKey | optionKey)
-        let numberKeyCodes: [UInt32] = [
-            UInt32(kVK_ANSI_1), UInt32(kVK_ANSI_2), UInt32(kVK_ANSI_3),
-            UInt32(kVK_ANSI_4), UInt32(kVK_ANSI_5), UInt32(kVK_ANSI_6),
-            UInt32(kVK_ANSI_7), UInt32(kVK_ANSI_8), UInt32(kVK_ANSI_9),
-        ]
-
-        for (index, keyCode) in numberKeyCodes.enumerated() {
+        for (index, binding) in HotKeyBinding.zoneBindings.enumerated() {
             let zoneIndex = index
-            register(keyCode: keyCode, modifiers: mods) {
+            register(keyCode: binding.keyCode, modifiers: binding.modifiers) {
                 WindowManager.snapToActiveZone(index: zoneIndex)
             }
         }

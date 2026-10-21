@@ -42,6 +42,8 @@ final class DragDetector {
 
     /// Window position at drag start — used to detect actual window movement vs text selection.
     private var windowStartPos: CGPoint?
+    /// The dragged window has moved during this gesture: it is a window drag.
+    private var windowHasMoved = false
 
     /// Timer for edge snap delay.
     private var edgeSnapTimer: Timer?
@@ -102,6 +104,7 @@ final class DragDetector {
         isDragging = false
         draggedWindow = nil
         windowStartPos = nil
+        windowHasMoved = false
         snapSuppressed = false
         pendingDragRestoreSize = nil
         didDragRestore = false
@@ -123,42 +126,50 @@ final class DragDetector {
         // AX state can be temporarily unavailable (notably for browser app shims).
         // Keep trying on subsequent drag events, but preserve the first window found.
         captureDraggedWindowIfNeeded()
+        let windowIsMoving = isWindowMoving()
 
         // Drag-away restore: un-snapping a snapped window restores its pre-snap size.
-        if let size = pendingDragRestoreSize, !didDragRestore, let w = draggedWindow, isWindowMoving() {
+        if let size = pendingDragRestoreSize, !didDragRestore, let w = draggedWindow, windowIsMoving {
             didDragRestore = true
             WindowManager.restoreSizeDuringDrag(of: w, to: size)
         }
 
-        guard !snapSuppressed else { return }
+        let mode = DragSnapPolicy.mode(
+            windowIsMoving: windowIsMoving,
+            shiftHeld: NSEvent.modifierFlags.contains(.shift),
+            suppressed: snapSuppressed,
+            edgeSnapEnabled: AppSettings.shared.edgeSnapEnabled
+        )
 
-        let shiftHeld = NSEvent.modifierFlags.contains(.shift)
-
-        if shiftHeld {
+        switch mode {
+        case .zones:
             // Shift: layout zone overlay, immediately. Edge preview yields.
             cancelEdgeSnapTimer()
             snapPreview.hide()
             if !isOverlayVisible { showOverlay() }
             if isOverlayVisible { updateHighlight(at: currentPos) }
-            return
-        }
 
-        if isOverlayVisible {
-            hideOverlay(snap: false)
-        }
-
-        // Edge snap (no modifier): edges → halves, corners → quarters.
-        let target = AppSettings.shared.edgeSnapEnabled && isWindowMoving()
-            ? EdgeSnapResolver.resolve(at: currentPos)
-            : nil
-
-        if let target = target {
-            if snapPreview.isVisible {
-                snapPreview.show(target)
-            } else if !isWaitingForEdgeSnap {
-                startEdgeSnapTimer()
+        case .edge:
+            if isOverlayVisible {
+                hideOverlay(snap: false)
             }
-        } else {
+
+            // Edge snap (no modifier): edges → halves, corners → quarters.
+            if let target = EdgeSnapResolver.resolve(at: currentPos) {
+                if snapPreview.isVisible {
+                    snapPreview.show(target)
+                } else if !isWaitingForEdgeSnap {
+                    startEdgeSnapTimer()
+                }
+            } else {
+                cancelEdgeSnapTimer()
+                snapPreview.hide()
+            }
+
+        case .none:
+            if isOverlayVisible {
+                hideOverlay(snap: false)
+            }
             cancelEdgeSnapTimer()
             snapPreview.hide()
         }
@@ -232,6 +243,7 @@ final class DragDetector {
         isDragging = false
         draggedWindow = nil
         windowStartPos = nil
+        windowHasMoved = false
         snapSuppressed = false
         pendingDragRestoreSize = nil
         didDragRestore = false
@@ -243,7 +255,7 @@ final class DragDetector {
         // Re-pressing Shift re-enables snapping after an Esc cancel.
         if shiftHeld && isDragging { snapSuppressed = false }
 
-        if shiftHeld && isDragging && !isOverlayVisible {
+        if shiftHeld && isDragging && !isOverlayVisible && isWindowMoving() {
             cancelEdgeSnapTimer()
             snapPreview.hide()
             showOverlay()
@@ -316,11 +328,14 @@ final class DragDetector {
     // MARK: - Window Movement Detection
 
     /// Check if the window has actually moved from its start position (i.e., user is dragging the window, not selecting text).
+    /// Latches once true, so a confirmed window drag stops re-reading AX on every event.
     private func isWindowMoving() -> Bool {
+        if windowHasMoved { return true }
         guard let w = draggedWindow, let startPos = windowStartPos,
               let currentPos = WindowManager.getPosition(of: w) else { return false }
         let threshold: CGFloat = 3.0
-        return abs(currentPos.x - startPos.x) > threshold || abs(currentPos.y - startPos.y) > threshold
+        windowHasMoved = abs(currentPos.x - startPos.x) > threshold || abs(currentPos.y - startPos.y) > threshold
+        return windowHasMoved
     }
 
     // MARK: - AX Helpers
@@ -328,7 +343,7 @@ final class DragDetector {
     /// Capture the dragged window and its starting position as AX makes them available.
     /// Once a window is found, it remains stable for the rest of the gesture.
     private func captureDraggedWindowIfNeeded() {
-        if draggedWindow == nil, let window = getFocusedWindow() {
+        if draggedWindow == nil, let window = WindowManager.windowForDrag(at: NSEvent.mouseLocation) {
             draggedWindow = window
             pendingDragRestoreSize = WindowManager.dragRestoreSize(for: window)
         }
@@ -336,10 +351,6 @@ final class DragDetector {
         if windowStartPos == nil, let window = draggedWindow {
             windowStartPos = WindowManager.getPosition(of: window)
         }
-    }
-
-    private func getFocusedWindow() -> AXUIElement? {
-        return WindowManager.getFocusedWindow()
     }
 
     // MARK: - Edge Snap Timer

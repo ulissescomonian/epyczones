@@ -969,6 +969,83 @@ enum WindowManager {
 
     // MARK: - AX Helpers
 
+    /// The window a drag gesture is moving: the window under the cursor,
+    /// falling back to the focused window when hit-testing finds nothing
+    /// usable (some app shims publish their AX tree late). Hit-testing keeps a
+    /// ⌘-drag of a background window from snapping the focused one instead.
+    static func windowForDrag(at point: NSPoint) -> AXUIElement? {
+        if let window = window(at: point) {
+            let pid = processID(of: window)
+            logAXMessage("drag target pid=\(pid) source=hit-test", key: "drag-target-hit-\(pid)", interval: 30)
+            return window
+        }
+        guard let focused = getFocusedWindow() else { return nil }
+        let pid = processID(of: focused)
+        logAXMessage("drag target pid=\(pid) source=focus", key: "drag-target-focus-\(pid)", interval: 30)
+        return focused
+    }
+
+    /// The usable window under a point in NSScreen coordinates, found by AX
+    /// hit-testing. Points over EpycZones' own windows and panels return nil,
+    /// so the hit-test never asks this process about itself.
+    static func window(at point: NSPoint) -> AXUIElement? {
+        guard !NSApp.windows.contains(where: { $0.isVisible && $0.frame.contains(point) }) else { return nil }
+
+        let primaryHeight = NSScreen.screens[0].frame.height
+        let systemWide = AXUIElementCreateSystemWide()
+        var element: AXUIElement?
+        let error = AXUIElementCopyElementAtPosition(
+            systemWide,
+            Float(point.x),
+            Float(primaryHeight - point.y),
+            &element
+        )
+        guard error == .success, let element else {
+            if error != .success && error != .noValue {
+                logAX("hit-test window", error: error, for: systemWide)
+            }
+            return nil
+        }
+
+        guard processID(of: element) != getpid(),
+              let window = containingWindow(of: element),
+              isUsableWindow(window) else { return nil }
+        return window
+    }
+
+    /// Upper bound for the parent walk in `containingWindow(of:)`.
+    private static let maxAncestorDepth = 32
+
+    /// Walks from a hit-tested element up to the window that contains it.
+    private static func containingWindow(of element: AXUIElement) -> AXUIElement? {
+        if role(of: element) == kAXWindowRole as String { return element }
+
+        var windowValue: AnyObject?
+        if AXUIElementCopyAttributeValue(element, kAXWindowAttribute as CFString, &windowValue) == .success,
+           let window = axElement(from: windowValue) {
+            return window
+        }
+
+        // Elements without an AXWindow attribute: climb the parent chain.
+        var current = element
+        for _ in 0..<maxAncestorDepth {
+            var parentValue: AnyObject?
+            guard AXUIElementCopyAttributeValue(current, kAXParentAttribute as CFString, &parentValue) == .success,
+                  let parent = axElement(from: parentValue) else { return nil }
+            if role(of: parent) == kAXWindowRole as String { return parent }
+            current = parent
+        }
+        return nil
+    }
+
+    private static func role(of element: AXUIElement) -> String? {
+        var value: AnyObject?
+        guard AXUIElementCopyAttributeValue(element, kAXRoleAttribute as CFString, &value) == .success else {
+            return nil
+        }
+        return value as? String
+    }
+
     static func getFocusedWindow() -> AXUIElement? {
         struct AppCandidate {
             let element: AXUIElement

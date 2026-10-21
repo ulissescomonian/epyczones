@@ -22,6 +22,38 @@ struct HotKeyBinding: Codable, Equatable {
     /// No binding assigned.
     static let none = HotKeyBinding(keyCode: UInt32.max, modifiers: 0)
     var isNone: Bool { keyCode == UInt32.max }
+
+    /// Fixed zone shortcuts ⌃⌥1 … ⌃⌥9, in zone order.
+    static let zoneBindings: [HotKeyBinding] = [
+        kVK_ANSI_1, kVK_ANSI_2, kVK_ANSI_3, kVK_ANSI_4, kVK_ANSI_5,
+        kVK_ANSI_6, kVK_ANSI_7, kVK_ANSI_8, kVK_ANSI_9,
+    ].map { HotKeyBinding(keyCode: UInt32($0), modifiers: defaultModifiers) }
+
+    enum Validation: Equatable {
+        case valid
+        /// Global shortcuts need ⌃, ⌥ or ⌘; Shift alone would capture typing.
+        case needsModifier
+        /// Already used; carries the name of the action or zone that owns it.
+        case conflict(String)
+    }
+
+    /// Checks whether `self` can become the shortcut for `action`, given the
+    /// other actions' current bindings and the fixed zone shortcuts.
+    func validate(for action: HotKeyAction, customBindings: [String: HotKeyBinding]) -> Validation {
+        let requiredModifiers = UInt32(controlKey | optionKey | cmdKey)
+        guard modifiers & requiredModifiers != 0 else { return .needsModifier }
+
+        if let zoneIndex = Self.zoneBindings.firstIndex(of: self) {
+            return .conflict("Zone \(zoneIndex + 1)")
+        }
+        for other in HotKeyAction.allCases where other != action {
+            let otherBinding = customBindings[other.rawValue] ?? other.defaultBinding
+            if otherBinding == self {
+                return .conflict(other.displayName)
+            }
+        }
+        return .valid
+    }
 }
 
 /// All configurable hotkey actions, grouped by category.

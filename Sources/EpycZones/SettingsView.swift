@@ -6,8 +6,7 @@ struct SettingsView: View {
     @State private var settings = AppSettings.shared
     @State private var workspaces = WorkspaceManager.loadAll()
     @State private var newWorkspaceName = ""
-    @State private var recordingAction: HotKeyAction?
-    @State private var keyMonitor: Any?
+    @State private var recorder = HotKeyRecorder()
     @State private var ruleStore = AppRuleStore.shared
     @State private var newRuleAppID = ""
     @State private var newRuleTargetTag = "position:leftHalf"
@@ -27,6 +26,8 @@ struct SettingsView: View {
         }
         .frame(minWidth: 520, minHeight: 500)
         .padding()
+        // Closing the window must never leave global hotkeys unregistered.
+        .onDisappear { recorder.stop() }
     }
 
     // MARK: - General
@@ -114,6 +115,12 @@ struct SettingsView: View {
                                     hotkeyButton(for: action)
                                         .frame(width: 100)
                                 }
+
+                                if recorder.action == action, let message = recorder.message {
+                                    Text(message)
+                                        .font(.caption)
+                                        .foregroundStyle(recorder.messageIsError ? .red : .secondary)
+                                }
                             }
                         }
                     }
@@ -121,6 +128,7 @@ struct SettingsView: View {
 
                 Section {
                     Button("Reset All to Defaults") {
+                        recorder.stop()
                         settings.customHotKeys = [:]
                         HotKeyManager.shared.reloadHotKeys()
                     }
@@ -128,56 +136,27 @@ struct SettingsView: View {
             }
             .padding()
         }
+        .onDisappear { recorder.stop() }
     }
 
     private func hotkeyButton(for action: HotKeyAction) -> some View {
         let binding = resolvedBinding(for: action)
-        let isRecording = recordingAction == action
+        let isRecording = recorder.action == action
 
         return Button {
-            // Unregister all hotkeys so they don't intercept the key press
-            HotKeyManager.shared.unregisterAll()
-            recordingAction = action
-            // Install a local event monitor to capture the next key press
-            keyMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { event in
-                guard self.recordingAction == action else { return event }
-
-                var carbonMods: UInt32 = 0
-                if event.modifierFlags.contains(.control) { carbonMods |= UInt32(controlKey) }
-                if event.modifierFlags.contains(.option) { carbonMods |= UInt32(optionKey) }
-                if event.modifierFlags.contains(.shift) { carbonMods |= UInt32(shiftKey) }
-                if event.modifierFlags.contains(.command) { carbonMods |= UInt32(cmdKey) }
-
-                guard carbonMods != 0 else { return event }
-
-                let keyCode = UInt32(event.keyCode)
-
-                // Escape cancels recording
-                if event.keyCode == 53 { // kVK_Escape
-                    self.stopRecording()
-                    return nil
-                }
-
-                self.settings.customHotKeys[action.rawValue] = HotKeyBinding(keyCode: keyCode, modifiers: carbonMods)
-                self.stopRecording()
-                return nil // consume the event
+            // Clicking the button that is recording cancels it.
+            if isRecording {
+                recorder.stop()
+            } else {
+                recorder.start(action)
             }
         } label: {
-            Text(isRecording ? "Press keys..." : binding.displayString)
+            Text(isRecording ? "Press keys…" : binding.displayString)
                 .font(.system(.body, design: .monospaced))
                 .foregroundStyle(isRecording ? .orange : .primary)
                 .frame(maxWidth: .infinity)
         }
         .buttonStyle(.bordered)
-    }
-
-    private func stopRecording() {
-        recordingAction = nil
-        if let monitor = keyMonitor {
-            NSEvent.removeMonitor(monitor)
-            keyMonitor = nil
-        }
-        HotKeyManager.shared.reloadHotKeys()
     }
 
     // MARK: - Workspaces
